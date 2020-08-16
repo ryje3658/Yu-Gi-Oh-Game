@@ -85,8 +85,14 @@ class Deck:
 
 
 class Board:
+    """Game board containing spaces for each players 5 monster spots, 5 magic/trap spots, a field zone, and two
+    graveyard spaces to match the aesthetic of the physical board.
+    """
 
     def __init__(self):
+        """Set all game spaces to the empty placeholder, to be changed by user according to their preferences, and the
+        graveyard spots and field zone spot to text descriptors.
+        """
         self.empty_placeholder = "-----------"
         self.field_zone = "Field"
         self.p1_monster_1 = self.empty_placeholder
@@ -111,6 +117,11 @@ class Board:
         self.p2_magic_4 = self.empty_placeholder
         self.p2_magic_5 = self.empty_placeholder
         self.p2_graveyard_display = "Graveyard"
+
+    def change_empty_placeholder(self, new_placeholder):
+        """Allows user to change placeholder according to preference in order to visualize the game more clearly."""
+        # Add logic to prevent bad input
+        self.empty_placeholder = new_placeholder
 
     def display_board(self):
         """Prints terminal representation of the game board."""
