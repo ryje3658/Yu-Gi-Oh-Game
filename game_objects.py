@@ -126,7 +126,7 @@ class Board:
     def display_board(self):
         """Prints terminal representation of the game board."""
 
-        print("                             -----Player 2-----\n")
+        print("                               -----Kaiba-----\n")
         print([self.p2_graveyard_display, self.p2_magic_1, self.p2_magic_2, self.p2_magic_3, self.p2_magic_4,
                self.p2_magic_5])
         print(["         ", self.p2_monster_1, self.p2_monster_2, self.p2_monster_3,
@@ -136,12 +136,14 @@ class Board:
                self.p1_monster_4, self.p1_monster_5])
         print([self.p1_graveyard_display, self.p1_magic_1, self.p1_magic_2, self.p1_magic_3, self.p1_magic_4,
                self.p1_magic_5])
-        print("\n                           -----Player 1-----")
+        print("\n                             -----Yugi-----\n")
 
 
 class Player:
+    """Player objects represent the two players in the game."""
 
     def __init__(self, name, player_deck: Deck):
+        """Players initialized with a unique deck and 4000 life points."""
         self.name = name
         self.player_deck = player_deck
         self.life_points = 4000
