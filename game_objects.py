@@ -1,0 +1,146 @@
+import random
+
+
+class Card:
+    """A Card object."""
+
+    def __init__(self, name, ten_char_name, effect):
+        self.name = name
+        self.ten_char_name = ten_char_name
+        self.position = None
+        self.location = "Deck"
+        self.effect = effect
+
+    def __repr__(self):
+        return self.name
+
+
+class Monster(Card):
+    """Monster Card object."""
+
+    def __init__(self, name, ten_char_name, effect, attack, defence, level, monster_type, attribute):
+        super().__init__(name, ten_char_name, effect)
+        self.attack = attack
+        self.defence = defence
+        self.level = level
+        self.monster_type = monster_type
+        self.attribute = attribute
+        self.effect = effect
+
+
+class Trap(Card):
+    """Trap Card object."""
+
+    def __init__(self, name, ten_char_name, effect, trap_type):
+        super().__init__(name, ten_char_name, effect)
+        self.trap_type = trap_type
+
+
+class Magic(Card):
+    """Magic Card object."""
+
+    def __init__(self, name, ten_char_name, effect):
+        super().__init__(name, ten_char_name, effect)
+
+
+class Equip(Magic):
+    """Equip Magic Card object."""
+
+    def __init__(self, name, ten_char_name, effect):
+        super().__init__(name, ten_char_name, effect)
+        self.target_monster = None
+
+
+class Field(Magic):
+    """Field Magic Card object."""
+
+    def __init__(self, name, ten_char_name, effect):
+        super().__init__(name, ten_char_name, effect)
+
+
+class Deck:
+    """Player's deck of cards, consisting of Card objects, with methods to pop and shuffle."""
+
+    def __init__(self, card_list: list):
+        self.card_list = card_list
+
+    def shuffle(self):
+        """Shuffle the deck."""
+        random.shuffle(self.card_list)
+
+    def pop(self):
+        """Remove top card from the deck and return it."""
+        card = self.card_list.pop()
+        return card
+
+    def get_length(self):
+        """Returns the number of cards left in the player's deck."""
+        return len(self.card_list)
+
+    def is_empty(self):
+        """Check if the deck has no cards left."""
+        if len(self.card_list) == 0:
+            return True
+        return False
+
+
+class Board:
+
+    def __init__(self):
+        self.empty_placeholder = "-----------"
+        self.field_zone = "Field"
+        self.p1_monster_1 = self.empty_placeholder
+        self.p1_monster_2 = self.empty_placeholder
+        self.p1_monster_3 = self.empty_placeholder
+        self.p1_monster_4 = self.empty_placeholder
+        self.p1_monster_5 = self.empty_placeholder
+        self.p1_magic_1 = self.empty_placeholder
+        self.p1_magic_2 = self.empty_placeholder
+        self.p1_magic_3 = self.empty_placeholder
+        self.p1_magic_4 = self.empty_placeholder
+        self.p1_magic_5 = self.empty_placeholder
+        self.p1_graveyard_display = "Graveyard"
+        self.p2_monster_1 = self.empty_placeholder
+        self.p2_monster_2 = self.empty_placeholder
+        self.p2_monster_3 = self.empty_placeholder
+        self.p2_monster_4 = self.empty_placeholder
+        self.p2_monster_5 = self.empty_placeholder
+        self.p2_magic_1 = self.empty_placeholder
+        self.p2_magic_2 = self.empty_placeholder
+        self.p2_magic_3 = self.empty_placeholder
+        self.p2_magic_4 = self.empty_placeholder
+        self.p2_magic_5 = self.empty_placeholder
+        self.p2_graveyard_display = "Graveyard"
+
+    def display_board(self):
+        """Prints terminal representation of the game board."""
+
+        print("                             -----Player 2-----\n")
+        print([self.p2_graveyard_display, self.p2_magic_1, self.p2_magic_2, self.p2_magic_3, self.p2_magic_4,
+               self.p2_magic_5])
+        print(["         ", self.p2_monster_1, self.p2_monster_2, self.p2_monster_3,
+               self.p2_monster_4, self.p2_monster_5])
+        print("\n\n")
+        print(["  " + self.field_zone + "  ", self.p1_monster_1, self.p1_monster_2, self.p1_monster_3,
+               self.p1_monster_4, self.p1_monster_5])
+        print([self.p1_graveyard_display, self.p1_magic_1, self.p1_magic_2, self.p1_magic_3, self.p1_magic_4,
+               self.p1_magic_5])
+        print("\n                           -----Player 1-----")
+
+
+class Player:
+
+    def __init__(self, name, player_deck: Deck):
+        self.name = name
+        self.player_deck = player_deck
+        self.life_points = 4000
+        self.hand = []
+
+    def shuffle_and_start_hand(self):
+        """Shuffles player's deck then deals 5 cards to create their starting hand."""
+        self.player_deck.shuffle()
+        for i in range(5):
+            self.hand.append(self.player_deck.pop())
+
+    def __repr__(self):
+        return self.name
