@@ -38,8 +38,22 @@ class Game:
     def main_phase(self):
         """Players are able to place cards onto the field according to the rules."""
 
+        print("Main phase starting...")
+
+        if self.current_player == self.p1:
+            abbrev = "p1"
+        else:
+            abbrev = "p2"
+
+        def check_for_open_spot(player_abbrev, card_type, slot_num):
+            """Checks if a space is occupied by a card."""
+            slot = player_abbrev + f"_{card_type}_" + slot_num
+            if getattr(self.board, slot) == self.board.empty_placeholder:
+                return slot
+            else:
+                return False
+
         while True:
-            print("Main phase starting...")
             print("Type the index [1..] of the card you'd like to play. Or type x if you'd like to end your first main "
                   "phase.")
             user_input = input()
@@ -49,11 +63,20 @@ class Game:
             else:
                 try:
                     card_to_play = self.current_player.hand[int(user_input) - 1]
-                    # Player choose to play a Monster card
+                    # Player chose to play a Monster card
                     if isinstance(card_to_play, Monster):
-                        print("You chose a monster card.")
+                        if self.current_player.summoned_monster_this_turn is False:
+                            slot_number = 0
+                            ready_to_place = False
+                            while not int(slot_number) in range(1, 6) and not ready_to_place:
+                                slot_number = input(f"Which monster slot would you like to place {card_to_play.name}"
+                                                    f" in? [1-5]")
+                                ready_to_place = check_for_open_spot(abbrev, "monster", slot_number)
+                            setattr(self.board, ready_to_place, card_to_play)
+                    # Player chose to play a Trap card
                     elif isinstance(card_to_play, Magic):
                         print("You chose a magic card.")
+                    # Player chose to play a Magic card
                     elif isinstance(card_to_play, Trap):
                         print("You chose a trap card.")
                 except IndexError:
@@ -62,7 +85,7 @@ class Game:
     def battle_phase(self):
         pass
 
-    def check_for_win(self):
+    def update_game_state(self):
         """Checks if either player has ran out of life points or if either player is unable to draw a card. Updates the
         game state if either condition is met.
         """
@@ -72,6 +95,15 @@ class Game:
             self.game_state = "Yugi won!"
         else:
             pass
+
+    def next_turn(self):
+        """Prepare for next player's turn, changing current player, incrementing turn count."""
+        print("Your turn is over.")
+        self.turn_count += 1
+        if self.current_player == self.p1:
+            self.current_player = self.p2
+        else:
+            self.current_player = self.p1
 
     def play_game(self):
         """Handles playing the game. Provides instructions turn by turn, accepting player input from terminal via
@@ -97,18 +129,15 @@ class Game:
             # Main Phase
             self.main_phase()
 
-            # Check for win
-            self.check_for_win()
+            # Update game state and then check for win
+            self.update_game_state()
             if self.game_state != "In Progress...":
                 print(self.game_state)
                 break
 
-            # Prepare for next player's turn, changing current player, incrementing turn count
-            self.turn_count += 1
-            if self.current_player == self.p1:
-                self.current_player = self.p2
-            else:
-                self.current_player = self.p1
+            # Get ready for the opposite player's turn
+            self.next_turn()
+
 
 
 if __name__ == "__main__":

@@ -148,6 +148,7 @@ class Player:
         self.player_deck = player_deck
         self.life_points = 4000
         self.hand = []
+        self.summoned_monster_this_turn = False
 
     def shuffle_and_start_hand(self):
         """Shuffles player's deck then deals 5 cards to create their starting hand."""
