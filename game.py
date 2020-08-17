@@ -126,9 +126,9 @@ class Game:
                     slot_number = input(f"Which monster slot would you like to place {monster.name} in? [1-5]")
                     ready_to_place = check_for_open_spot(abbrev, "monster", slot_number)
 
-                    # Choose position of monster (attack, defence, face down defence)
-                    monster_position = input("What position would you like your monster in? a for attack, d for defence"
-                                             " or f for face-down defence.")
+                    # Choose position of monster (attack, defense, face down defense)
+                    monster_position = input("What position would you like your monster in? a for attack, d for defense"
+                                             " or f for face-down defense.")
                     if monster_position == "a":
                         monster.position = "ATK"
                     elif monster_position == "d":
@@ -286,15 +286,28 @@ class Game:
             """Damage is calculated, life points are updated, and destroyed monsters are removed from the board and
             added to the graveyard.
             """
-            damage = 0
+            damage_to_current_player = 0
+            damage_to_opponent = 0
 
+            # Attacking defense position monster
             if tgt_monster.position == "DEF" or "FD":
-                damage = atk_monster.attack - tgt_monster.defence
+                # Attack > defense -- remove the defense monster from the field
+                if atk_monster.attack - tgt_monster.defense > 0:
+                    # Remove the defense position monster from the field
+                    pass
+                # Attack <= defense -- attacking player takes damage equal to difference, both monsters remain on field
+                else:
+                    damage_to_current_player += (tgt_monster.defense - atk_monster.attack)
 
+            else:
+                pass
 
         # -- Battle Phase -- Main Logic Loop --
 
         while True:
+            # No battle phase on the first player's turn
+            if self.turn_count == 0:
+                break
             print(colored("Type 'x' to end the battle phase or any other key to declare an attack.", "blue"))
             user_decision = input()
             if user_decision == 'x':

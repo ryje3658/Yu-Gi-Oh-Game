@@ -19,10 +19,10 @@ class Card:
 class Monster(Card):
     """Monster Card object."""
 
-    def __init__(self, name, ten_char_name, effect, attack, defence, level, monster_type, attribute):
+    def __init__(self, name, ten_char_name, effect, attack, defense, level, monster_type, attribute):
         super().__init__(name, ten_char_name, effect)
         self.attack = attack
-        self.defence = defence
+        self.defense = defense
         self.level = level
         self.monster_type = monster_type
         self.attribute = attribute
