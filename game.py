@@ -1,4 +1,3 @@
-from game_objects import *
 from cards import *
 import time
 from termcolor import colored
@@ -16,6 +15,7 @@ class Game:
         self.p1 = Player("Yugi", yugis_deck)
         self.p2 = Player("Kaiba", kaibas_deck)
         self.current_player = (self.p1 if random.randint(0, 1) else self.p2)
+        self.opposing_player = (self.p1 if self.current_player == self.p2 else self.p2)
         self.board = Board()
         self.turn_count = 0
 
@@ -34,7 +34,6 @@ class Game:
             print("Drawing a card...")
             time.sleep(1.25)
             self.current_player.hand.append(self.current_player.player_deck.pop())
-        print(f"Your hand:", self.current_player.hand)
 
     def main_phase(self):
         """Players are able to place cards onto the field according to the rules."""
@@ -43,6 +42,15 @@ class Game:
             abbrev = "p1"
         else:
             abbrev = "p2"
+
+        def main_phase_user_input():
+            """Prompts user to enter input based on potential actions they can take. Returns that input."""
+            print(colored("Possible actions to take...", "blue"))
+            print(f"Type [1-{len(self.current_player.hand)}]: to play a card your hand.\n"
+                  f"Type 'f': to activate a magic or trap card on the field or change the position of a monster.\n"
+                  f"Type 'x': to end the main phase.\n")
+            action_input = input()
+            return action_input
 
         def check_for_open_spot(player_abbrev, card_type, slot_num):
             """Checks if a space is occupied by a card."""
@@ -90,14 +98,15 @@ class Game:
             card_to_activate.position = "FACEUP"
             # Activate card's specific effect
             card_to_activate.effect()
+            print(card_to_activate, "effect activated!")
 
         def activate_magic_or_trap_from_hand(card_from_hand):
             """Activates the effect of a magic or trap card directly from the hand."""
             card_to_activate = card_from_hand
             if isinstance(card_to_activate, Magic or Trap):
                 # Activate card's specific effect
-                print("ACTIVATED!")
                 card_to_activate.effect()
+                print(card_to_activate, "effect activated!")
                 # Move card to graveyard
                 self.current_player.graveyard.append(card_to_activate)
                 # Remove card from hand
@@ -151,53 +160,66 @@ class Game:
                 else:
                     print(colored("Invalid input. Please try again!", "red"))
 
-        # Main Phase -- Main Loop Logic --
+        def change_card_on_field():
+            """Prompts user to specify what kind of action they want to take on a card on the field."""
+            magic_or_monster = input("Type 'm' to select a monster card or 's' to select a magic or trap card.")
+            # Change the position of a monster on the field.
+            if magic_or_monster == 'm':
+                change_monster_position()
+            # Activate a magic or trap card on the field.
+            elif magic_or_monster == 's':
+                activate_magic_or_trap()
+            else:
+                print(colored("Invalid input. Please try again!", "red"))
+
+        def play_card_from_hand(hand_input):
+            """Player chose to play a card from their hand. Prompts for input of which card and what they would like
+            to do.
+            """
+            try:
+                card_to_play = self.current_player.hand[int(hand_input) - 1]
+                # Player chose to play a Monster card
+                if isinstance(card_to_play, Monster):
+                    summon_monster(card_to_play)
+                # Player chose to play a Trap or Magic Card
+                else:
+                    set_or_activate = input("Type s if you would like to set the magic/trap card or a if you would "
+                                            "like to activate the card now.")
+                    # Set a magic or trap card on the field.
+                    if set_or_activate == "s":
+                        set_magic_or_trap(card_to_play)
+                    # Activate a magic or trap card from the hand.
+                    elif set_or_activate == "a":
+                        activate_magic_or_trap_from_hand(card_to_play)
+                    else:
+                        print(colored("Invalid input...please try again!", "red"))
+            except IndexError:
+                print(colored("Please provide a valid index.", "red"))
+
+        # -- Main Phase -- Main Loop Logic --
         while True:
-            print(colored("Possible actions to take...", "blue"))
-            print(f"Type [1-{len(self.current_player.hand)}]: to play a card your hand.\n"
-                  f"Type 'f': to activate a magic or trap card on the field or change the position of a monster.\n"
-                  f"Type 'x': to end the main phase.\n")
-            user_input = input()
-            # End main phase
+            # Display the board, players' life points, and the current player's hand after each action
+            print("opposing player:", self.opposing_player.name)
+            print("\n")
+            self.display_life_points()
+            self.board.display_board()
+            print("Your hand:", self.current_player.hand)
+
+            # Determine action to take depending on user input
+            user_input = main_phase_user_input()
             if user_input == "x":
                 print("Ending main phase.")
                 return
-            # Activate or change the position of a card on the field
+            # Change card on the field
             elif user_input == "f":
-                magic_or_monster = input("Type 'm' to select a monster card or 's' to select a magic or trap card.")
-                # Change the position of a monster on the field.
-                if magic_or_monster == 'm':
-                    change_monster_position()
-                # Activate a magic or trap card on the field.
-                elif magic_or_monster == 's':
-                    activate_magic_or_trap()
-                else:
-                    print(colored("Invalid input. Please try again!", "red"))
+                change_card_on_field()
+            # Play card from hand
             elif 1 <= int(user_input) <= 5:
-                try:
-                    card_to_play = self.current_player.hand[int(user_input) - 1]
-                    # Player chose to play a Monster card
-                    if isinstance(card_to_play, Monster):
-                        summon_monster(card_to_play)
-                    # Player chose to play a Trap or Magic Card
-                    else:
-                        set_or_activate = input("Type s if you would like to set the magic/trap card or a if you would "
-                                                "like to activate the card now.")
-                        # Set a magic or trap card on the field.
-                        if set_or_activate == "s":
-                            set_magic_or_trap(card_to_play)
-                        # Activate a magic or trap card from the hand.
-                        elif set_or_activate == "a":
-                            activate_magic_or_trap_from_hand(card_to_play)
-                        else:
-                            print(colored("Invalid input...please try again!", "red"))
-                except IndexError:
-                    print(colored("Please provide a valid index.", "red"))
+                play_card_from_hand(int(user_input))
             else:
                 print(colored("Invalid input. Please try again!", "red"))
 
     def battle_phase(self):
-        print("PLACEHOLDER BATTLE PHASE")
         pass
 
     def update_game_state(self):
@@ -212,20 +234,32 @@ class Game:
             pass
 
     def next_turn(self):
-        """Prepare for next player's turn, changing current player, incrementing turn count, and resetting ability to
-        summon a monster."""
+        """Prepare for next player's turn, changing current player, opposing player, incrementing turn count, and
+        resetting player's ability to summon a monster for their next turn.
+        """
         self.turn_count += 1
         self.current_player.summoned_monster_this_turn = False
         if self.current_player == self.p1:
             self.current_player = self.p2
+            self.opposing_player = self.p1
         else:
             self.current_player = self.p1
+            self.opposing_player = self.p2
 
     def update_board(self):
         """Before switching between players, updates the board so that the opposing player can only see cards that
         should be visible to them.
         """
         pass
+
+    def display_life_points(self):
+        """Displays both players' life points to the terminal."""
+
+        current_lp_str = f"{self.current_player.name}: {self.current_player.life_points} life points"
+        opposing_lp_str = f"{self.opposing_player.name}: {self.opposing_player.life_points} life points"
+
+        print(colored(current_lp_str, "magenta"))
+        print(colored(opposing_lp_str, "magenta"))
 
     def play_game(self):
         """Handles playing the game. Provides instructions turn by turn, accepting player input from terminal via
@@ -236,26 +270,18 @@ class Game:
         # Main loop to run game.
         while True:
             # Display board and inform player of whose turn it is.
-            self.board.display_board()
             print(f"It is {self.current_player}'s turn.")
 
             # Draw phase
-            print("Starting draw phase...")
             self.draw_phase()
 
             # Main Phase
-            print("Starting main phase 1...")
             self.main_phase()
 
             # Battle Phase
-            print("Starting battle phase...")
-            self.board.display_board()
             self.battle_phase()
 
-            # Main Phase
-            print("Starting main phase 2...")
-            self.board.display_board()
-            print(self.current_player.hand)
+            # Main Phase 2
             self.main_phase()
 
             # Update game state and then check for win, display message if win

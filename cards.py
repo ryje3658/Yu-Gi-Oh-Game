@@ -2,7 +2,7 @@ from game_objects import *
 
 
 # Individual card effects stored in functions below in form: {card_name}_eff().
-def monster_reborn_eff(game, target_monster: Monster):
+def monster_reborn_eff():
     pass
 
 
@@ -39,8 +39,9 @@ def dark_hole_eff():
 
 
 def oozaki_eff():
+    # """Opponent loses 800 life points."""
+    # target_game.opposing_player.life_points -= 800
     pass
-
 
 def fissure_eff():
     pass
