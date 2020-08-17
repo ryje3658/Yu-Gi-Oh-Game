@@ -60,6 +60,14 @@ class Game:
             else:
                 return False
 
+        def check_for_set_magic_or_trap(player_abbrev, card_type, slot_num):
+            """Checks if the player has a set magic or trap card in the specified location, returns it if so."""
+            slot = player_abbrev + f"_{card_type}_" + slot_num
+            if isinstance(getattr(self.board, slot), Magic or Trap):
+                return getattr(self.board, slot)
+            else:
+                return False
+
         def set_magic_or_trap(mag_trap):
             slot_number = input(f"Which magic or trap slot would you like to place {mag_trap.name} in? [1-5]")
             ready_to_place = check_for_open_spot(abbrev, "magic", slot_number)
@@ -69,9 +77,33 @@ class Game:
             mag_trap.position = "SET"
             # Place magic or trap card on board
             setattr(self.board, ready_to_place, mag_trap)
+            # Remove card from hand after card is placed on field.
+            self.current_player.hand.remove(mag_trap)
 
-        def activate_magic_or_trap(mag_trap):
-            pass
+        def activate_magic_or_trap():
+            """Activates the effect of a magic or trap card on the field."""
+            slot_number = input(f"Which magic or trap card on the field would you like to activate? [1-5]")
+            card_to_activate = check_for_set_magic_or_trap(abbrev, "magic", slot_number)
+            if not card_to_activate:
+                print(colored("Invalid location, try again!", "red"))
+            # Set magic or trap position to "FACEUP"
+            card_to_activate.position = "FACEUP"
+            # Activate card's specific effect
+            card_to_activate.effect()
+
+        def activate_magic_or_trap_from_hand(card_from_hand):
+            """Activates the effect of a magic or trap card directly from the hand."""
+            card_to_activate = card_from_hand
+            if isinstance(card_to_activate, Magic or Trap):
+                # Activate card's specific effect
+                print("ACTIVATED!")
+                card_to_activate.effect()
+                # Move card to graveyard
+                self.current_player.graveyard.append(card_to_activate)
+                # Remove card from hand
+                self.current_player.hand.remove(card_to_activate)
+            else:
+                print(colored("Invalid card, try again!", "red"))
 
         def summon_monster(monster):
             """Summons a monster from player's hand to the field."""
@@ -119,6 +151,7 @@ class Game:
                 else:
                     print(colored("Invalid input. Please try again!", "red"))
 
+        # Main Phase -- Main Loop Logic --
         while True:
             print(colored("Possible actions to take...", "blue"))
             print(f"Type [1-{len(self.current_player.hand)}]: to play a card your hand.\n"
@@ -132,8 +165,10 @@ class Game:
             # Activate or change the position of a card on the field
             elif user_input == "f":
                 magic_or_monster = input("Type 'm' to select a monster card or 's' to select a magic or trap card.")
+                # Change the position of a monster on the field.
                 if magic_or_monster == 'm':
                     change_monster_position()
+                # Activate a magic or trap card on the field.
                 elif magic_or_monster == 's':
                     activate_magic_or_trap()
                 else:
@@ -148,12 +183,12 @@ class Game:
                     else:
                         set_or_activate = input("Type s if you would like to set the magic/trap card or a if you would "
                                                 "like to activate the card now.")
-                        # Set a magic or trap card.
+                        # Set a magic or trap card on the field.
                         if set_or_activate == "s":
                             set_magic_or_trap(card_to_play)
-                        # Activate a magic or trap card.
+                        # Activate a magic or trap card from the hand.
                         elif set_or_activate == "a":
-                            activate_magic_or_trap(card_to_play)
+                            activate_magic_or_trap_from_hand(card_to_play)
                         else:
                             print(colored("Invalid input...please try again!", "red"))
                 except IndexError:

@@ -173,6 +173,7 @@ class Player:
         self.player_deck = player_deck
         self.life_points = 4000
         self.hand = []
+        self.graveyard = []
         self.summoned_monster_this_turn = False
 
     def shuffle_and_start_hand(self):
