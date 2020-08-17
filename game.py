@@ -98,15 +98,18 @@ class Game:
             pass
 
         while True:
-            print(f"Type the index [1-{len(self.current_player.hand)}] of the card you'd like to play from your hand. "
-                  f"Type f if you'd like to activate or change the position of a card on the field. Or type x if you'd "
-                  f" like to end the main phase.")
+            print(f"Type [1-{len(self.current_player.hand)}]: to play a card your hand.\n"
+                  f"Type 'f': to activate or change the position of a card on the field.\n"
+                  f"Type 'x': to end the main phase.\n")
             user_input = input()
             if user_input == "x":
                 print("Ending main phase.")
                 return
             elif user_input == "f":
                 # user must select a card on the field to either activate or change positions
+                # select a card given the options of cards the current player has on field
+                # depending on what card it is - call function to change position or activate effect
+                # BOOM
                 pass
             else:
                 try:
@@ -127,7 +130,7 @@ class Game:
                         else:
                             print(colored("Invalid input...please try again!", "red"))
                 except IndexError:
-                    print("Please provide a valid index.")
+                    print(colored("Please provide a valid index.", "red"))
 
     def battle_phase(self):
         print("PLACEHOLDER BATTLE PHASE")
@@ -186,6 +189,8 @@ class Game:
 
             # Main Phase
             print("Starting main phase 2...")
+            print(self.board)
+            print(self.current_player.hand)
             self.main_phase()
 
             # Update game state and then check for win, display message if win
