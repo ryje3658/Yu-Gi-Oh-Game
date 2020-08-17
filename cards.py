@@ -2,7 +2,7 @@ from game_objects import *
 
 
 # Individual card effects stored in functions below in form: {card_name}_eff().
-def monster_reborn_eff(target_monster: Monster):
+def monster_reborn_eff(game, target_monster: Monster):
     pass
 
 

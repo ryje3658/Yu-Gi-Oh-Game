@@ -52,6 +52,14 @@ class Game:
             else:
                 return False
 
+        def check_for_monster(player_abbrev, card_type, slot_num):
+            """Checks if a space is occupied by a monster. Returns that Monster object if so."""
+            slot = player_abbrev + f"_{card_type}_" + slot_num
+            if isinstance(getattr(self.board, slot), Monster):
+                return getattr(self.board, slot)
+            else:
+                return False
+
         def set_magic_or_trap(mag_trap):
             slot_number = input(f"Which magic or trap slot would you like to place {mag_trap.name} in? [1-5]")
             ready_to_place = check_for_open_spot(abbrev, "magic", slot_number)
@@ -93,25 +101,44 @@ class Game:
             # Prevent player from summoning multiple monsters in a turn
             elif self.current_player.summoned_monster_this_turn:
                 print(colored("You can't summon another monster this turn!", "red"))
+            # Remove card from hand after card is placed on field.
+            self.current_player.hand.remove(monster)
 
         def change_monster_position():
-            pass
+            """Changes the position attribute of a Monster on the field. (To attack or defense.)"""
+            monster_slot_num = input("Please enter 1-5 to choose the monster you'd like to alter.")
+            monster_on_field = check_for_monster(abbrev, "monster", monster_slot_num)
+            if monster_on_field is not False:
+                desired_position = input("What position would you like the monster in?\n"
+                                         "'a' : attack\n"
+                                         "'d' : defense\n")
+                if desired_position == "a":
+                    monster_on_field.position = "ATK"
+                elif desired_position == "d":
+                    monster_on_field.position = "DEF"
+                else:
+                    print(colored("Invalid input. Please try again!", "red"))
 
         while True:
+            print(colored("Possible actions to take...", "blue"))
             print(f"Type [1-{len(self.current_player.hand)}]: to play a card your hand.\n"
-                  f"Type 'f': to activate or change the position of a card on the field.\n"
+                  f"Type 'f': to activate a magic or trap card on the field or change the position of a monster.\n"
                   f"Type 'x': to end the main phase.\n")
             user_input = input()
+            # End main phase
             if user_input == "x":
                 print("Ending main phase.")
                 return
+            # Activate or change the position of a card on the field
             elif user_input == "f":
-                # user must select a card on the field to either activate or change positions
-                # select a card given the options of cards the current player has on field
-                # depending on what card it is - call function to change position or activate effect
-                # BOOM
-                pass
-            else:
+                magic_or_monster = input("Type 'm' to select a monster card or 's' to select a magic or trap card.")
+                if magic_or_monster == 'm':
+                    change_monster_position()
+                elif magic_or_monster == 's':
+                    activate_magic_or_trap()
+                else:
+                    print(colored("Invalid input. Please try again!", "red"))
+            elif 1 <= int(user_input) <= 5:
                 try:
                     card_to_play = self.current_player.hand[int(user_input) - 1]
                     # Player chose to play a Monster card
@@ -131,6 +158,8 @@ class Game:
                             print(colored("Invalid input...please try again!", "red"))
                 except IndexError:
                     print(colored("Please provide a valid index.", "red"))
+            else:
+                print(colored("Invalid input. Please try again!", "red"))
 
     def battle_phase(self):
         print("PLACEHOLDER BATTLE PHASE")
@@ -185,11 +214,12 @@ class Game:
 
             # Battle Phase
             print("Starting battle phase...")
+            self.board.display_board()
             self.battle_phase()
 
             # Main Phase
             print("Starting main phase 2...")
-            print(self.board)
+            self.board.display_board()
             print(self.current_player.hand)
             self.main_phase()
 
