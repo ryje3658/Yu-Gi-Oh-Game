@@ -1,4 +1,5 @@
 import random
+from termcolor import colored
 
 
 class Card:
@@ -27,6 +28,14 @@ class Monster(Card):
         self.attribute = attribute
         self.effect = effect
 
+    def __repr__(self):
+        if self.position == "FD":
+            return colored("Face Down Monster", "blue")
+        elif self.position is not None:
+            return colored(f"{self.name}/{self.position}", "blue")
+        else:
+            return colored(self.name, "blue")
+
 
 class Trap(Card):
     """Trap Card object."""
@@ -35,12 +44,18 @@ class Trap(Card):
         super().__init__(name, ten_char_name, effect)
         self.trap_type = trap_type
 
+    def __repr__(self):
+        return colored(self.name, "red")
+
 
 class Magic(Card):
     """Magic Card object."""
 
     def __init__(self, name, ten_char_name, effect):
         super().__init__(name, ten_char_name, effect)
+
+    def __repr__(self):
+        return colored(self.name, "green")
 
 
 class Equip(Magic):
@@ -50,12 +65,18 @@ class Equip(Magic):
         super().__init__(name, ten_char_name, effect)
         self.target_monster = None
 
+    def __repr__(self):
+        return colored(self.name, "green")
+
 
 class Field(Magic):
     """Field Magic Card object."""
 
     def __init__(self, name, ten_char_name, effect):
         super().__init__(name, ten_char_name, effect)
+
+    def __repr__(self):
+        return colored(self.name, "green")
 
 
 class Deck:
@@ -94,7 +115,7 @@ class Board:
         graveyard spots and field zone spot to text descriptors.
         """
         self.empty_placeholder = "-----------"
-        self.field_zone = "Field"
+        self.field_zone = self.empty_placeholder
         self.p1_monster_1 = self.empty_placeholder
         self.p1_monster_2 = self.empty_placeholder
         self.p1_monster_3 = self.empty_placeholder
@@ -117,6 +138,10 @@ class Board:
         self.p2_magic_4 = self.empty_placeholder
         self.p2_magic_5 = self.empty_placeholder
         self.p2_graveyard_display = "Graveyard"
+        self.p1_slots = [self.p1_monster_1, self.p1_monster_2, self.p1_monster_3, self.p1_monster_4, self.p1_monster_5,
+                         self.p1_magic_1, self.p1_magic_2, self.p1_magic_3, self.p1_magic_4, self.p1_magic_5]
+        self.p2_slots = [self.p2_monster_1, self.p2_monster_2, self.p2_monster_3, self.p2_monster_4, self.p2_monster_5,
+                         self.p2_magic_1, self.p2_magic_2, self.p2_magic_3, self.p2_magic_4, self.p2_magic_5]
 
     def change_empty_placeholder(self, new_placeholder):
         """Allows user to change placeholder according to preference in order to visualize the game more clearly."""

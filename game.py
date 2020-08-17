@@ -1,6 +1,7 @@
 from game_objects import *
 from cards import *
 import time
+from termcolor import colored
 
 
 class Game:
@@ -38,8 +39,6 @@ class Game:
     def main_phase(self):
         """Players are able to place cards onto the field according to the rules."""
 
-        print("Main phase starting...")
-
         if self.current_player == self.p1:
             abbrev = "p1"
         else:
@@ -53,36 +52,85 @@ class Game:
             else:
                 return False
 
+        def set_magic_or_trap(mag_trap):
+            slot_number = input(f"Which magic or trap slot would you like to place {mag_trap.name} in? [1-5]")
+            ready_to_place = check_for_open_spot(abbrev, "magic", slot_number)
+            if not ready_to_place:
+                print(colored("Invalid location, try again!", "red"))
+            # Set magic or trap position to "SET"
+            mag_trap.position = "SET"
+            # Place magic or trap card on board
+            setattr(self.board, ready_to_place, mag_trap)
+
+        def activate_magic_or_trap(mag_trap):
+            pass
+
+        def summon_monster(monster):
+            """Summons a monster from player's hand to the field."""
+            if self.current_player.summoned_monster_this_turn is False:
+                slot_number = 0
+                ready_to_place = False
+                while not int(slot_number) in range(1, 6) and not ready_to_place:
+                    # Choose where to place monster on board
+                    slot_number = input(f"Which monster slot would you like to place {monster.name} in? [1-5]")
+                    ready_to_place = check_for_open_spot(abbrev, "monster", slot_number)
+
+                    # Choose position of monster (attack, defence, face down defence)
+                    monster_position = input("What position would you like your monster in? a for attack, d for defence"
+                                             " or f for face-down defence.")
+                    if monster_position == "a":
+                        monster.position = "ATK"
+                    elif monster_position == "d":
+                        monster.position = "DEF"
+                    elif monster_position == "f":
+                        monster.position = "FD"
+                    else:
+                        print("Invalid input try again!")
+                        return
+                # Place monster on the board
+                setattr(self.board, ready_to_place, monster)
+                self.current_player.summoned_monster_this_turn = True
+            # Prevent player from summoning multiple monsters in a turn
+            elif self.current_player.summoned_monster_this_turn:
+                print(colored("You can't summon another monster this turn!", "red"))
+
+        def change_monster_position():
+            pass
+
         while True:
-            print("Type the index [1..] of the card you'd like to play. Or type x if you'd like to end your first main "
-                  "phase.")
+            print(f"Type the index [1-{len(self.current_player.hand)}] of the card you'd like to play from your hand. "
+                  f"Type f if you'd like to activate or change the position of a card on the field. Or type x if you'd "
+                  f" like to end the main phase.")
             user_input = input()
             if user_input == "x":
                 print("Ending main phase.")
                 return
+            elif user_input == "f":
+                # user must select a card on the field to either activate or change positions
+                pass
             else:
                 try:
                     card_to_play = self.current_player.hand[int(user_input) - 1]
                     # Player chose to play a Monster card
                     if isinstance(card_to_play, Monster):
-                        if self.current_player.summoned_monster_this_turn is False:
-                            slot_number = 0
-                            ready_to_place = False
-                            while not int(slot_number) in range(1, 6) and not ready_to_place:
-                                slot_number = input(f"Which monster slot would you like to place {card_to_play.name}"
-                                                    f" in? [1-5]")
-                                ready_to_place = check_for_open_spot(abbrev, "monster", slot_number)
-                            setattr(self.board, ready_to_place, card_to_play)
-                    # Player chose to play a Trap card
-                    elif isinstance(card_to_play, Magic):
-                        print("You chose a magic card.")
-                    # Player chose to play a Magic card
-                    elif isinstance(card_to_play, Trap):
-                        print("You chose a trap card.")
+                        summon_monster(card_to_play)
+                    # Player chose to play a Trap or Magic Card
+                    else:
+                        set_or_activate = input("Type s if you would like to set the magic/trap card or a if you would "
+                                                "like to activate the card now.")
+                        # Set a magic or trap card.
+                        if set_or_activate == "s":
+                            set_magic_or_trap(card_to_play)
+                        # Activate a magic or trap card.
+                        elif set_or_activate == "a":
+                            activate_magic_or_trap(card_to_play)
+                        else:
+                            print(colored("Invalid input...please try again!", "red"))
                 except IndexError:
                     print("Please provide a valid index.")
 
     def battle_phase(self):
+        print("PLACEHOLDER BATTLE PHASE")
         pass
 
     def update_game_state(self):
@@ -97,13 +145,20 @@ class Game:
             pass
 
     def next_turn(self):
-        """Prepare for next player's turn, changing current player, incrementing turn count."""
-        print("Your turn is over.")
+        """Prepare for next player's turn, changing current player, incrementing turn count, and resetting ability to
+        summon a monster."""
         self.turn_count += 1
+        self.current_player.summoned_monster_this_turn = False
         if self.current_player == self.p1:
             self.current_player = self.p2
         else:
             self.current_player = self.p1
+
+    def update_board(self):
+        """Before switching between players, updates the board so that the opposing player can only see cards that
+        should be visible to them.
+        """
+        pass
 
     def play_game(self):
         """Handles playing the game. Provides instructions turn by turn, accepting player input from terminal via
@@ -118,26 +173,30 @@ class Game:
             print(f"It is {self.current_player}'s turn.")
 
             # Draw phase
+            print("Starting draw phase...")
             self.draw_phase()
 
             # Main Phase
+            print("Starting main phase 1...")
             self.main_phase()
 
             # Battle Phase
+            print("Starting battle phase...")
             self.battle_phase()
 
             # Main Phase
+            print("Starting main phase 2...")
             self.main_phase()
 
-            # Update game state and then check for win
+            # Update game state and then check for win, display message if win
             self.update_game_state()
             if self.game_state != "In Progress...":
                 print(self.game_state)
                 break
 
             # Get ready for the opposite player's turn
+            print("Your turn is over...")
             self.next_turn()
-
 
 
 if __name__ == "__main__":
