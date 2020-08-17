@@ -27,6 +27,7 @@ class Monster(Card):
         self.monster_type = monster_type
         self.attribute = attribute
         self.effect = effect
+        self.attacked_this_turn = False
 
     def __repr__(self):
         if self.position == "FD":

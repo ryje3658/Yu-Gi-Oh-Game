@@ -36,7 +36,9 @@ class Game:
             self.current_player.hand.append(self.current_player.player_deck.pop())
 
     def main_phase(self):
-        """Players are able to place cards onto the field according to the rules."""
+        """Players are able to place cards onto the field according to the rules. Players are also able to manipulate
+        their cards on the field by changing their positions or activating card effects.
+        """
 
         if self.current_player == self.p1:
             abbrev = "p1"
@@ -229,7 +231,89 @@ class Game:
                 check_valid_hand_and_play(user_input)
 
     def battle_phase(self):
-        pass
+        """Players are able to use monsters they control to declare attacks on their opponents monsters, or in the case
+        that the opponent has no monsters, they are able to attack their opponent's life points directly.
+        """
+
+        # Determines what monsters the current player and the opposing player have on the field.
+        if self.current_player == self.p1:
+            abbrev = "p1"
+            currents_monsters = [x for x in [self.board.p1_monster_1, self.board.p1_monster_2, self.board.p1_monster_3,
+                                 self.board.p1_monster_4, self.board.p1_monster_5] if isinstance(x, Monster)]
+            opponents_monsters = [x for x in [self.board.p2_monster_1, self.board.p2_monster_2, self.board.p2_monster_3,
+                                  self.board.p2_monster_4, self.board.p2_monster_5] if isinstance(x, Monster)]
+        else:
+            abbrev = "p2"
+            currents_monsters = [x for x in [self.board.p2_monster_1, self.board.p2_monster_2, self.board.p2_monster_3,
+                                 self.board.p2_monster_4, self.board.p2_monster_5] if isinstance(x, Monster)]
+            opponents_monsters = [x for x in [self.board.p1_monster_1, self.board.p1_monster_2, self.board.p1_monster_3,
+                                  self.board.p1_monster_4, self.board.p1_monster_5] if isinstance(x, Monster)]
+
+        def monsters_able_to_attack(all_current_monsters):
+            """Determines what monsters are able to attack this turn, by checking if they are in attack position.
+            Returns a list of monster objects that are able to attack this turn.
+            """
+
+            return [x for x in all_current_monsters if x.position == "ATK"]
+
+        def select_monster_declaring_attack(able_to_attack):
+            """Current player selects monster they'd like to initiate an attack from the list of valid monsters.
+            Returns the monster declaring the attack.
+            """
+            print("These are your monsters that are able to attack:", able_to_attack)
+            user_input = input(f"Please choose a monster [1 - {len(able_to_attack)}] to initiate attack.")
+            if int(user_input) in range(1, len(able_to_attack) + 1):
+                return able_to_attack[int(user_input) - 1]
+            else:
+                print(colored("Invalid index, please try again!", "red"))
+
+        def select_monster_to_attack(potential_targets):
+            """Current player selects opponents' monster they'd like to attack. Returns that monster being attacked."""
+            if potential_targets is None:
+                direct_attack()
+            else:
+                print("These are the monsters you can attack:", potential_targets)
+                user_input = input(f"Please choose a monster [1 - {len(potential_targets)}] to attack.")
+                if int(user_input) in range(1, len(potential_targets) + 1):
+                    return potential_targets[int(user_input) - 1]
+                else:
+                    print(colored("Invalid index, please try again!", "red"))
+
+        def direct_attack():
+            print("Direct attack baby!!!")
+
+        def damage_calc_update_life_points(atk_monster, tgt_monster):
+            """Damage is calculated, life points are updated, and destroyed monsters are removed from the board and
+            added to the graveyard.
+            """
+            damage = 0
+
+            if tgt_monster.position == "DEF" or "FD":
+                damage = atk_monster.attack - tgt_monster.defence
+
+
+        # -- Battle Phase -- Main Logic Loop --
+
+        while True:
+            print(colored("Type 'x' to end the battle phase or any other key to declare an attack.", "blue"))
+            user_decision = input()
+            if user_decision == 'x':
+                break
+            else:
+                attack_pos_monsters = monsters_able_to_attack(currents_monsters)
+                # Determine the attacking monster
+                monster_attacking = select_monster_declaring_attack(attack_pos_monsters)
+                print("monster attacking", monster_attacking)
+                # Determine the monster being attacked
+                target_monster = select_monster_to_attack(opponents_monsters)
+                print("target monster", target_monster)
+                # Damage calculation and update board
+                damage_calc_update_life_points(monster_attacking, target_monster)
+
+                # Check if user has no more monsters able to attack
+                if len(monsters_able_to_attack(currents_monsters)) < 1:
+                    print(colored("Battle phase over. You have no more monsters able to attack.", "blue"))
+                    break
 
     def update_game_state(self):
         """Checks if either player has ran out of life points or if either player is unable to draw a card. Updates the
