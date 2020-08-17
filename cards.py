@@ -284,5 +284,5 @@ yugis_deck = Deck([mystical_elf, feral_imp, winged_dragon, summoned_skull, beave
                    book_of_arts, dark_hole2, dian_keto, ancient_elf, magical_ghost, fissure2, trap_hole2,
                    two_pronged_attack2, de_spell2, monster_reborn2, reinforcements2, change_of_heart, stern_mystic,
                    wall_of_illusion, neo, baron, man_eating, sorcerer, last_will, waboku, soul_ex, card_destruction,
-                   trap_master2, dragon_capture_jar, yami, man_eater, remove_trap2, remove_trap2, castle_walls2,
+                   trap_master2, dragon_capture_jar, yami, man_eater, remove_trap2, castle_walls2,
                    ultimate_offering2])

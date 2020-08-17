@@ -69,7 +69,7 @@ class Equip(Magic):
         return colored(self.name, "green")
 
 
-class Field(Magic):
+class Field(Card):
     """Field Magic Card object."""
 
     def __init__(self, name, ten_char_name, effect):
@@ -114,7 +114,7 @@ class Board:
         """Set all game spaces to the empty placeholder, to be changed by user according to their preferences, and the
         graveyard spots and field zone spot to text descriptors.
         """
-        self.empty_placeholder = "-----------"
+        self.empty_placeholder = "----------"
         self.field_zone = self.empty_placeholder
         self.p1_monster_1 = self.empty_placeholder
         self.p1_monster_2 = self.empty_placeholder
@@ -154,11 +154,11 @@ class Board:
         print("                               -----Kaiba-----\n")
         print([self.p2_graveyard_display, self.p2_magic_1, self.p2_magic_2, self.p2_magic_3, self.p2_magic_4,
                self.p2_magic_5])
-        print(["         ", self.p2_monster_1, self.p2_monster_2, self.p2_monster_3,
+        print([self.empty_placeholder, self.p2_monster_1, self.p2_monster_2, self.p2_monster_3,
                self.p2_monster_4, self.p2_monster_5])
         print("\n\n")
-        print(["  " + self.field_zone + "  ", self.p1_monster_1, self.p1_monster_2, self.p1_monster_3,
-               self.p1_monster_4, self.p1_monster_5])
+        print([self.field_zone, self.p1_monster_1, self.p1_monster_2, self.p1_monster_3, self.p1_monster_4,
+              self.p1_monster_5])
         print([self.p1_graveyard_display, self.p1_magic_1, self.p1_magic_2, self.p1_magic_3, self.p1_magic_4,
                self.p1_magic_5])
         print("\n                             -----Yugi-----\n")

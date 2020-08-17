@@ -196,10 +196,21 @@ class Game:
             except IndexError:
                 print(colored("Please provide a valid index.", "red"))
 
+        def check_valid_hand_and_play(user_input_hand):
+            """Checks if user input a value index to play a card from their hand, then plays that card or informs the
+            user they've provided invalid input.
+            """
+            try:
+                if 1 <= int(user_input_hand) <= len(self.current_player.hand):
+                    play_card_from_hand(int(user_input_hand))
+                else:
+                    print(colored("Invalid index. Please enter a valid index!", "red"))
+            except ValueError:
+                print(colored("Invalid input. Please try again!", "red"))
+
         # -- Main Phase -- Main Loop Logic --
         while True:
             # Display the board, players' life points, and the current player's hand after each action
-            print("opposing player:", self.opposing_player.name)
             print("\n")
             self.display_life_points()
             self.board.display_board()
@@ -213,11 +224,9 @@ class Game:
             # Change card on the field
             elif user_input == "f":
                 change_card_on_field()
-            # Play card from hand
-            elif 1 <= int(user_input) <= 5:
-                play_card_from_hand(int(user_input))
+            # Play card from hand/catch invalid input
             else:
-                print(colored("Invalid input. Please try again!", "red"))
+                check_valid_hand_and_play(user_input)
 
     def battle_phase(self):
         pass
