@@ -1,161 +1,11 @@
 from game_objects import *
 
 
-# Individual card effects stored in functions below in form: {card_name}_eff().
-def monster_reborn_eff():
-    pass
-
-
-def wicked_worm_eff():
-    pass
-
-
-def lord_of_d_eff():
-    pass
-
-
-def mysterious_puppeteer_eff():
-    pass
-
-
-def trap_master_eff():
-    pass
-
-
-def hane_hane_eff():
-    pass
-
-
-def dark_energy_eff():
-    pass
-
-
-def invigoration_eff():
-    pass
-
-
-def dark_hole_eff():
-    pass
-
-
-def oozaki_eff():
-    # """Opponent loses 800 life points."""
-    # target_game.opposing_player.life_points -= 800
-    pass
-
-def fissure_eff():
-    pass
-
-
-def trap_hole_eff():
-    pass
-
-
-def two_pronged_attack_eff():
-    pass
-
-
-def despell_eff():
-    pass
-
-
-def inexperienced_spy_eff():
-    pass
-
-
-def reinforcements_eff():
-    pass
-
-
-def ancient_telescope_eff():
-    pass
-
-
-def just_desserts_eff():
-    pass
-
-
-def remove_trap_eff():
-    pass
-
-
-def sogen_eff():
-    pass
-
-
-def flute_eff():
-    pass
-
-
-def ultimate_offering_eff():
-    pass
-
-
-def castle_wall_eff():
-    pass
-
-
-def reverse_trap_eff():
-    pass
-
-
-def man_eater_bug_eff():
-    pass
-
-
-def stern_mystic_eff():
-    pass
-
-
-def wall_of_illusion_eff():
-    pass
-
-
-def sword_of_dark_destruction_eff():
-    pass
-
-
-def book_of_secret_arts_eff():
-    pass
-
-
-def dian_keto_eff():
-    pass
-
-
-def change_of_heart_eff():
-    pass
-
-
-def soul_exchange_eff():
-    pass
-
-
-def last_will_eff():
-    pass
-
-
-def card_destruction_eff():
-    pass
-
-
-def yami_eff():
-    pass
-
-
-def dragon_capture_jar_eff():
-    pass
-
-
-def waboku_eff():
-    pass
-
-
 # Kaiba Starter Deck Monster Cards
 blue_eyes = Monster("Blue-Eyes White Dragon", "Blue-Eyes ", None, 3000, 2500, 8, "Dragon", "Light")
 hitotsu = Monster("Hitotsu-Me Giant", "Hitotsu-Me", None, 1200, 1000, 4, "Beast-Warrior", "Earth")
 ryu_kishin = Monster("Ryu-Kishin", "Ryu-Kishin", None, 1200, 1000, 4, "Beast-Warrior", "Earth")
-wicked_worm = Monster("The Wicked Worm Beast", "WickedWorm", wicked_worm_eff, 1500, 700, 3, "Beast", "Earth")
+wicked_worm = Monster("The Wicked Worm Beast", "WickedWorm", True, 1500, 700, 3, "Beast", "Earth")
 battle_ox = Monster("Battle Ox", "Battle Ox ", None, 1700, 1000, 4, "Beast-Warrior", "Earth")
 koumori_dragon = Monster("Koumori Dragon", "Koumori D.", None, 1500, 1200, 4, "Dragon", "Normal")
 judge_man = Monster("Judge Man", "Judge Man ", None, 2200, 1500, 6, "Warrior", "Earth")
@@ -179,33 +29,33 @@ destoyer_golem = Monster("Destroyer Golem", "Dest Golem", None, 1500, 1000, 4, "
 d_human = Monster("D. Human", " D. Human ", None, 1300, 1100, 4, "Warrior", "Earth")
 pale_beast = Monster("Pale Beast", "Pale Beast", None, 1500, 1200, 4, "Beast", "Earth")
 skull_red_bird = Monster("Skull Red Bird", "Skull Bird", None, 1550, 1200, 4, "Winged Beast", "Wind")
-lord_of_d = Monster("Lord of D.", "Lord of D.", lord_of_d_eff, 1200, 1100, 4, "Spellcaster", "Dark")
-myst_pup = Monster("Mysterious Puppeteer", "mPuppeteer", mysterious_puppeteer_eff, 1000, 1500, 4, "Warrior", "Earth")
-trap_master = Monster("Trap Master", "TrapMaster", trap_master_eff, 500, 1100, 3, "Warrior", "Earth")
-hane_hane = Monster("Hane-Hane", "Hane-Hane ", hane_hane_eff, 450, 500, 2, "Beast", "Earth")
+lord_of_d = Monster("Lord of D.", "Lord of D.", True, 1200, 1100, 4, "Spellcaster", "Dark")
+myst_pup = Monster("Mysterious Puppeteer", "mPuppeteer", True, 1000, 1500, 4, "Warrior", "Earth")
+trap_master = Monster("Trap Master", "TrapMaster", True, 500, 1100, 3, "Warrior", "Earth")
+hane_hane = Monster("Hane-Hane", "Hane-Hane ", True, 450, 500, 2, "Beast", "Earth")
 
 # Kaiba Starter Deck Magic Cards
-monster_reborn = Magic("Monster Reborn", "M. Reborn ", monster_reborn_eff)
-remove_trap = Magic("Remove Trap", "RemoveTrap", remove_trap_eff)
-sogen = Field("Sogen", "   Sogen  ", sogen_eff)
-flute_of_summoning_dragon = Magic("Flute of Summoning Dragon", "Flute - SD", flute_eff)
-ancient_telescope = Magic("Ancient Telescope", " Telescope", ancient_telescope_eff)
-inexperienced_spy = Magic("Inexperienced Spy", "Inexpd Spy", inexperienced_spy_eff)
-de_spell = Magic("De-Spell", " De-Spell ", despell_eff)
-fissure = Magic("Fissure", " Fissure  ", fissure_eff)
-oozaki = Magic("Oozaki", " Oozaki  ", oozaki_eff())
-dark_hole = Magic("Dark Hole", "Dark Hole ", dark_hole_eff)
-invigoration = Equip("Invigoration", "Invigorate", invigoration_eff)
-dark_energy = Equip("Dark Energy", "DarkEnergy", dark_energy_eff)
+monster_reborn = Magic("Monster Reborn", "M. Reborn ", True)
+remove_trap = Magic("Remove Trap", "RemoveTrap", True)
+sogen = Field("Sogen", "   Sogen  ", True)
+flute_of_summoning_dragon = Magic("Flute of Summoning Dragon", "Flute - SD", True)
+ancient_telescope = Magic("Ancient Telescope", " Telescope", True)
+inexperienced_spy = Magic("Inexperienced Spy", "Inexpd Spy", True)
+de_spell = Magic("De-Spell", " De-Spell ", True)
+fissure = Magic("Fissure", " Fissure  ", True)
+oozaki = Magic("Oozaki", " Oozaki  ", True)
+dark_hole = Magic("Dark Hole", "Dark Hole ", True)
+invigoration = Equip("Invigoration", "Invigorate", True)
+dark_energy = Equip("Dark Energy", "DarkEnergy", True)
 
 # Kaiba Starter Deck Trap Cards
-ultimate_offering = Trap("Ultimate Offering", "U.Offering", ultimate_offering_eff, "Continuous")
-castle_walls = Trap("Castle Walls", "CastleWall", castle_wall_eff, "Normal")
-reverse_trap = Trap("Reverse Trap", "Rev. Trap ", reverse_trap_eff, "Normal")
-just_desserts = Trap("Just Desserts", "J.Desserts", just_desserts_eff, "Normal")
-reinforcements = Equip("Reinforcements", "Reinforce ", reinforcements_eff)
-two_pronged_attack = Trap("Two-Pronged Attack", "2P- Attack", two_pronged_attack_eff, "Normal")
-trap_hole = Trap("Trap Hole", "Trap Hole ", trap_hole_eff, "Quick")
+ultimate_offering = Trap("Ultimate Offering", "U.Offering", True, "Continuous")
+castle_walls = Trap("Castle Walls", "CastleWall", True, "Normal")
+reverse_trap = Trap("Reverse Trap", "Rev. Trap ", True, "Normal")
+just_desserts = Trap("Just Desserts", "J.Desserts", True, "Normal")
+reinforcements = Equip("Reinforcements", "Reinforce ", True)
+two_pronged_attack = Trap("Two-Pronged Attack", "2P- Attack", True, "Normal")
+trap_hole = Trap("Trap Hole", "Trap Hole ", True, "Quick")
 
 ####
 ####
@@ -233,39 +83,39 @@ claw_reacher = Monster("Claw Reacher", "Claw Reach", None, 1000, 800, 3, "Fiend"
 mystic_clown_2 = Monster("Mystic Clown", "Myst Clown", None, 1500, 1000, 4, "Fiend", "Dark")
 ancient_elf = Monster("Ancient Elf", "AncientElf", None, 1450, 1200, 4, "Spellcaster", "Light")
 magical_ghost = Monster("Magical Ghost", "MagicGhost", None, 1300, 1400, 4, "Zombie", "Dark")
-stern_mystic = Monster("The Stern Mystic", "St. Mystic", stern_mystic_eff, 1500, 1200, 4, "Spellcaster", "Light")
-wall_of_illusion = Monster("Wall of Illusion", "W. Illusion", wall_of_illusion_eff, 1000, 1850, 4, "Fiend", "Dark")
+stern_mystic = Monster("The Stern Mystic", "St. Mystic", True, 1500, 1200, 4, "Spellcaster", "Light")
+wall_of_illusion = Monster("Wall of Illusion", "W. Illusion", True, 1000, 1850, 4, "Fiend", "Dark")
 neo = Monster("Neo the Magic Swordsman", "Neo Sword ", None, 1700, 1000, 4, "Spellcaster", "Light")
 baron = Monster("Baron of the Fiend Sword", "BaronFiend", None, 1550, 800, 4, "Fiend", "Dark")
 man_eating = Monster("Man-Eating Treasure Chest", "Man-Eating", None, 1600, 1000, 4, "Fiend", "Dark")
 sorcerer = Monster("Sorcerer of the Doomed", " Sorcerer ", None, 1450, 1200, 4, "Spellcaster", "Dark")
-trap_master2 = Monster("Trap Master", "TrapMaster", trap_master_eff, 500, 1100, 3, "Warrior", "Earth")
-man_eater = Monster("Man-Eater Bug", "Man-Eater B", man_eater_bug_eff, 450, 600, 2, "Insect", "Earth")
+trap_master2 = Monster("Trap Master", "TrapMaster", True, 500, 1100, 3, "Warrior", "Earth")
+man_eater = Monster("Man-Eater Bug", "Man-Eater B", True, 450, 600, 2, "Insect", "Earth")
 
 # Yugi Starter Deck Magic Cards
-monster_reborn2 = Magic("Monster Reborn", "M. Reborn ", monster_reborn_eff)
-remove_trap2 = Magic("Remove Trap", "RemoveTrap", remove_trap_eff)
-de_spell2 = Magic("De-Spell", " De-Spell ", despell_eff)
-fissure2 = Magic("Fissure", " Fissure  ", fissure_eff)
-dark_hole2 = Magic("Dark Hole", "Dark Hole ", dark_hole_eff)
-sword_of_dark = Equip("Sword of Dark Destruction", "Dark Sword", sword_of_dark_destruction_eff)
-book_of_arts = Equip("Book of Secret Arts", "Secret Arts", book_of_secret_arts_eff)
-dian_keto = Magic("Dian Keto the Cure Master", "Dian Keto ", dian_keto_eff)
-change_of_heart = Magic("Change of Heart", "Chng Heart", change_of_heart_eff)
-last_will = Magic("Last Will", "Last Will ", last_will_eff)
-soul_ex = Magic("Soul Exchange", "Soul Exchg", soul_exchange_eff)
-card_destruction = Magic("Card Destruction", "Card Destr", card_destruction_eff)
-yami = Field("Yami", "   Yami   ", yami_eff)
+monster_reborn2 = Magic("Monster Reborn", "M. Reborn ", True)
+remove_trap2 = Magic("Remove Trap", "RemoveTrap", True)
+de_spell2 = Magic("De-Spell", " De-Spell ", True)
+fissure2 = Magic("Fissure", " Fissure  ", True)
+dark_hole2 = Magic("Dark Hole", "Dark Hole ", True)
+sword_of_dark = Equip("Sword of Dark Destruction", "Dark Sword", True)
+book_of_arts = Equip("Book of Secret Arts", "Secret Arts", True)
+dian_keto = Magic("Dian Keto the Cure Master", "Dian Keto ", True)
+change_of_heart = Magic("Change of Heart", "Chng Heart", True)
+last_will = Magic("Last Will", "Last Will ", True)
+soul_ex = Magic("Soul Exchange", "Soul Exchg", True)
+card_destruction = Magic("Card Destruction", "Card Destr", True)
+yami = Field("Yami", "   Yami   ", True)
 
 # Yugi Starter Deck Trap Cards
-ultimate_offering2 = Trap("Ultimate Offering", "U.Offering", ultimate_offering_eff, "Continuous")
-castle_walls2 = Trap("Castle Walls", "CastleWall", castle_wall_eff, "Normal")
-reverse_trap2 = Trap("Reverse Trap", "Rev. Trap ", reverse_trap_eff, "Normal")
-reinforcements2 = Equip("Reinforcements", "Reinforce ", reinforcements_eff)
-two_pronged_attack2 = Trap("Two-Pronged Attack", "2P- Attack", two_pronged_attack_eff, "Normal")
-trap_hole2 = Trap("Trap Hole", "Trap Hole ", trap_hole_eff, "Quick")
-dragon_capture_jar = Trap("Dragon Capture Jar", "D Capt Jar", dragon_capture_jar_eff, "Normal")
-waboku = Trap("Waboku", "  Waboku  ", waboku_eff, "Normal")
+ultimate_offering2 = Trap("Ultimate Offering", "U.Offering", True, "Continuous")
+castle_walls2 = Trap("Castle Walls", "CastleWall", True, "Normal")
+reverse_trap2 = Trap("Reverse Trap", "Rev. Trap ", True, "Normal")
+reinforcements2 = Equip("Reinforcements", "Reinforce ", True)
+two_pronged_attack2 = Trap("Two-Pronged Attack", "2P- Attack", True, "Normal")
+trap_hole2 = Trap("Trap Hole", "Trap Hole ", True, "Quick")
+dragon_capture_jar = Trap("Dragon Capture Jar", "D Capt Jar", True, "Normal")
+waboku = Trap("Waboku", "  Waboku  ", True, "Normal")
 
 # Create deck with all of Kaiba's cards.
 kaibas_deck = Deck([blue_eyes, hitotsu, ryu_kishin, wicked_worm, battle_ox, koumori_dragon, judge_man, rogue_doll,

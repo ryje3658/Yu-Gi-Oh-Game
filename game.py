@@ -37,10 +37,10 @@ class Game:
         print(colored("________________________________________________", "green"))
         print("\n")
 
-    # # Card effects for individual cards- each effect is unique and manipulates the game/board/cards in different ways.
-    # def oozaki_effect(self):
-    #     """Oozaki card inflicts 800 points of direct damage to opponent's life points."""
-    #     self.opposing_player.life_points -= 800
+    # Card effects for individual cards- each effect is unique and manipulates the game/board/cards in different ways.
+    def oozaki_effect(self):
+        """Oozaki card inflicts 800 points of direct damage to opponent's life points."""
+        self.opposing_player.life_points -= 800
 
     def draw_phase(self):
         """Player draws one card from their deck and adds it to their hand. Displays new hand to player. First player '
@@ -122,7 +122,7 @@ class Game:
             # Set magic or trap position to "FACEUP"
             card_to_activate.position = "FACEUP"
             # Activate card's specific effect
-            card_to_activate.effect()
+            print(type(self.card_effects[card_to_activate.name]))
             print(card_to_activate, "effect activated!")
 
         def activate_magic_or_trap_from_hand(card_from_hand):
