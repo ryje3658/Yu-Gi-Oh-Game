@@ -216,7 +216,7 @@ class Game:
             print("\n")
             self.display_life_points()
             self.board.display_board()
-            print("Your hand:", self.current_player.hand)
+            print(f"{self.current_player}'s hand: {self.current_player.hand}")
 
             # Determine action to take depending on user input
             user_input = main_phase_user_input()
@@ -268,10 +268,12 @@ class Game:
                 print(colored("Invalid index, please try again!", "red"))
 
         def select_monster_to_attack(potential_targets):
-            """Current player selects opponents' monster they'd like to attack. Returns that monster being attacked."""
+            """Current player selects opponents' monster they'd like to attack. Receives a list of opponents monsters
+            on the field. Returns that monster being attacked.
+            """
             potential_targets = [x for x in potential_targets if x.sent_to_grave_this_turn is False]
             if not potential_targets:
-                direct_attack()
+                return False
             else:
                 print("These are the monsters you can attack:", potential_targets)
                 user_input = input(f"Please choose a monster [1 - {len(potential_targets)}] to attack.")
@@ -280,8 +282,23 @@ class Game:
                 else:
                     print(colored("Invalid index, please try again!", "red"))
 
-        def direct_attack():
-            print("Direct attack baby!!!")
+        def opposing_monsters(potential_targets):
+            """Checks if the opponent has monsters on the field. Returns True if they do, False if they have none."""
+            potential_targets = [x for x in potential_targets if x.sent_to_grave_this_turn is False]
+            if not potential_targets:
+                return False
+            else:
+                return True
+
+        def direct_attack(direct_attacking_monster):
+            """Monster attacks opponent directly subtracting their attack from the opponent's life points. Sets the
+            attacking monster's attacked_this_turn attribute to True. Receives the attacking monster object, returns
+            nothing.
+            """
+            damage = direct_attacking_monster.attack
+            self.opposing_player.life_points -= damage
+            direct_attacking_monster.attacked_this_turn = True
+            print(f"{direct_attacking_monster} attacked {self.opposing_player} directly, inflicting {damage} damage!")
 
         def damage_calc_update_life_points(atk_monster, tgt_monster):
             """Damage is calculated, life points are updated, and destroyed monsters are removed from the board and
@@ -318,10 +335,14 @@ class Game:
                     damage_to_current_player += (tgt_monster.defense - atk_monster.attack)
             # Attacking attack position monster
             elif tgt_monster.position == "ATK":
-                # Attack >= attack of target monster, calculate damage and remove target monster from field
-                if atk_monster.attack >= tgt_monster.attack:
+                # Attack > attack of target monster, calculate damage and remove target monster from field
+                if atk_monster.attack > tgt_monster.attack:
                     damage_to_opponent += (atk_monster.attack - tgt_monster.attack)
                     remove_monster_from_field(tgt_monster, 1)
+                # Attack of both monsters is equal, both monsters are removed from the field, no life point damage
+                elif atk_monster.attack == tgt_monster.attack:
+                    remove_monster_from_field(tgt_monster, 1)
+                    remove_monster_from_field(atk_monster, 0)
                 # Attack < attack of target monster, calculate damage and remove attacking monster from field
                 else:
                     damage_to_current_player += (tgt_monster.attack - atk_monster.attack)
@@ -343,14 +364,18 @@ class Game:
             if user_decision == 'x':
                 break
             else:
+                # Determine set of possible monsters to attack
                 attack_pos_monsters = monsters_able_to_attack(currents_monsters)
                 # Determine the attacking monster
                 monster_attacking = select_monster_declaring_attack(attack_pos_monsters)
                 # Determine the monster being attacked
-                target_monster = select_monster_to_attack(opponents_monsters)
-                # Damage calculation and update board
-                damage_calc_update_life_points(monster_attacking, target_monster)
-
+                if opposing_monsters(opponents_monsters) is False:
+                    # If opponent has no monsters left, direct attack on opponent is initiated
+                    direct_attack(monster_attacking)
+                else:
+                    target_monster = select_monster_to_attack(opponents_monsters)
+                    # Damage calculation and update board
+                    damage_calc_update_life_points(monster_attacking, target_monster)
                 # Check if user has no more monsters able to attack
                 if len(monsters_able_to_attack(currents_monsters)) < 1:
                     print(colored("Battle phase over. You have no more monsters able to attack.", "blue"))
@@ -420,12 +445,11 @@ class Game:
 
         # Main loop to run game.
         while True:
-            # Display board and inform player of whose turn it is.
+            # Inform player of whose turn it is.
             print(f"It is {self.current_player}'s turn.")
 
             # Draw phase
             self.draw_phase()
-            print(vars(self.board))
 
             # Main Phase
             self.main_phase()
