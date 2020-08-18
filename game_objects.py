@@ -3,7 +3,13 @@ from termcolor import colored
 
 
 class Card:
-    """A Card object."""
+    """A Card object in the game."""
+
+    """Overarching class encompassing all card types in the game. Each card has attributes of name, ten character name,
+    position (on field), location, and effect. No cards in game are purely Card objects, rather the various types of 
+    cards that inherit from this class (Monster, Magic, Trap, Equip, Field) are the objects that are interacted with in
+    the playing of the game.
+    """
 
     def __init__(self, name, ten_char_name, effect):
         self.name = name
@@ -18,6 +24,15 @@ class Card:
 
 class Monster(Card):
     """Monster Card object."""
+
+    """Inherits from Card class, name, ten character name, and effect. Further attributes unique to the Monster class
+    are defined. These include attack, defense, level, monster_type, and attribute. Instances also contain attributes
+    of attacked_this_turn and sent_to_grave_this_turn which are set to False and are used in gameplay to track what
+    actions monsters can perform at various stages of play.
+    
+    Monster are represented differently on the game board based on their position attribute and all monsters are 
+    represented with blue text for clarity.
+    """
 
     def __init__(self, name, ten_char_name, effect, attack, defense, level, monster_type, attribute):
         super().__init__(name, ten_char_name, effect)
@@ -42,6 +57,10 @@ class Monster(Card):
 class Trap(Card):
     """Trap Card object."""
 
+    """Inherits from Card class, name, ten character name, and effect. A further attribute of trap_type is defined. 
+    Traps are represented in red text in the game for clarity.
+    """
+
     def __init__(self, name, ten_char_name, effect, trap_type):
         super().__init__(name, ten_char_name, effect)
         self.trap_type = trap_type
@@ -53,6 +72,10 @@ class Trap(Card):
 class Magic(Card):
     """Magic Card object."""
 
+    """Inherits from Card class, name, ten character name, and effect. Magic are represented in green text in the game 
+    for clarity.
+    """
+
     def __init__(self, name, ten_char_name, effect):
         super().__init__(name, ten_char_name, effect)
 
@@ -62,6 +85,10 @@ class Magic(Card):
 
 class Equip(Magic):
     """Equip Magic Card object."""
+
+    """Inherits from Magic class, name, ten character name, and effect. Equip are represented in green text in the game 
+    for clarity.
+    """
 
     def __init__(self, name, ten_char_name, effect):
         super().__init__(name, ten_char_name, effect)
@@ -74,6 +101,10 @@ class Equip(Magic):
 class Field(Card):
     """Field Magic Card object."""
 
+    """Inherits from Magic class, name, ten character name, and effect. Magic are represented in green text in the game 
+    for clarity.
+    """
+
     def __init__(self, name, ten_char_name, effect):
         super().__init__(name, ten_char_name, effect)
 
@@ -82,7 +113,11 @@ class Field(Card):
 
 
 class Deck:
-    """Player's deck of cards, consisting of Card objects, with methods to pop and shuffle."""
+    """Player's deck of Cards."""
+
+    """Deck is a list of Card objects (50 cards per deck). Contains methods to shuffle the deck, pop the top card from
+    the deck, retrieve the length of the deck, and check if the deck has no cards left.
+    """
 
     def __init__(self, card_list: list):
         self.card_list = card_list
@@ -108,8 +143,11 @@ class Deck:
 
 
 class Board:
-    """Game board containing spaces for each players 5 monster spots, 5 magic/trap spots, a field zone, and two
-    graveyard spaces to match the aesthetic of the physical board.
+    """Game board object."""
+
+    """Board contains spaces for each players 5 monster spots, 5 magic/trap spots, a field zone, and two
+    graveyard spaces to match the aesthetic of a physical board. Contains a method to display the board to the screen
+    and to change the empty placeholder to user preference, for clarity purposes.
     """
 
     def __init__(self):
@@ -168,6 +206,12 @@ class Board:
 
 class Player:
     """Player objects represent the two players in the game."""
+
+    """Each player has a name, player_deck which is a Deck object, life points, a hand and graveyard which are empty
+    lists which are populated with cards as the game progresses, and a summon_monster_this_turn attribute to keep 
+    track of their ability to perform certain actions. Contains a method to shuffle their deck and deal a starting hand
+    of 5 cards, which is called at the beginning of the game.
+    """
 
     def __init__(self, name, player_deck: Deck):
         """Players initialized with a unique deck and 4000 life points."""
