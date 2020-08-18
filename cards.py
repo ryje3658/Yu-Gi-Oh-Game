@@ -2,35 +2,35 @@ from game_objects import *
 
 
 # Card effects for individual cards- each effect is unique and manipulates the game/board/cards in different ways.
-def monster_reborn_eff():
+def monster_reborn_eff(game):
     pass
 
 
-def wicked_worm_eff():
+def the_wicked_worm_beast_eff(game):
     pass
 
 
-def lord_of_d_eff():
+def lord_of_d_eff(game):
     pass
 
 
-def mysterious_puppeteer_eff():
+def mysterious_puppeteer_eff(game):
     pass
 
 
-def trap_master_eff():
+def trap_master_eff(game):
     pass
 
 
-def hane_hane_eff():
+def hane_hane_eff(game):
     pass
 
 
-def dark_energy_eff():
+def dark_energy_eff(game):
     pass
 
 
-def invigoration_eff():
+def invigoration_eff(game):
     pass
 
 
@@ -61,112 +61,112 @@ def oozaki_eff(game):
     game.opposing_player.life_points -= 800
 
 
-def fissure_eff():
+def fissure_eff(game):
     pass
 
 
-def trap_hole_eff():
+def trap_hole_eff(game):
     pass
 
 
-def two_pronged_attack_eff():
+def two_pronged_attack_eff(game):
     pass
 
 
-def despell_eff():
+def de_spell_eff(game):
     pass
 
 
-def inexperienced_spy_eff():
+def inexperienced_spy_eff(game):
     pass
 
 
-def reinforcements_eff():
+def reinforcements_eff(game):
     pass
 
 
-def ancient_telescope_eff():
+def ancient_telescope_eff(game):
     pass
 
 
-def just_desserts_eff():
+def just_desserts_eff(game):
     pass
 
 
-def remove_trap_eff():
+def remove_trap_eff(game):
     pass
 
 
-def sogen_eff():
+def sogen_eff(game):
     pass
 
 
-def flute_eff():
+def flute_of_summoning_dragon_eff(game):
     pass
 
 
-def ultimate_offering_eff():
+def ultimate_offering_eff(game):
     pass
 
 
-def castle_wall_eff():
+def castle_walls_eff(game):
     pass
 
 
-def reverse_trap_eff():
+def reverse_trap_eff(game):
     pass
 
 
-def man_eater_bug_eff():
+def man_eater_bug_eff(game):
     pass
 
 
-def stern_mystic_eff():
+def the_stern_mystic_eff(game):
     pass
 
 
-def wall_of_illusion_eff():
+def wall_of_illusion_eff(game):
     pass
 
 
-def sword_of_dark_destruction_eff():
+def sword_of_dark_destruction_eff(game):
     pass
 
 
-def book_of_secret_arts_eff():
+def book_of_secret_arts_eff(game):
     pass
 
 
-def dian_keto_eff(game):
+def dian_keto_the_cure_master_eff(game):
     """Dian Keto card increases player's life points by 1000."""
     game.current_player.life_points += 1000
 
 
-def change_of_heart_eff():
+def change_of_heart_eff(game):
     pass
 
 
-def soul_exchange_eff():
+def soul_exchange_eff(game):
     pass
 
 
-def last_will_eff():
+def last_will_eff(game):
     pass
 
 
-def card_destruction_eff():
+def card_destruction_eff(game):
     pass
 
 
-def yami_eff():
+def yami_eff(game):
     pass
 
 
-def dragon_capture_jar_eff():
+def dragon_capture_jar_eff(game):
     pass
 
 
-def waboku_eff():
+def waboku_eff(game):
     pass
 
 

@@ -4,7 +4,14 @@ from termcolor import colored
 
 
 class Game:
-    """Handles the playing of a Yu-gi-oh duel."""
+    """A Yu-Gi-Oh Game object."""
+
+    """Handles the playing of a Yu-gi-oh duel by keeping track of the game state, turn count, current player and 
+    opposing player relative to the turn. Game is handled with a nested series of while loops representing the overall 
+    flow of the game, then the flow of a player's turn, the the flow of each phase (Draw, Main 1, Battle, Main 2) in 
+    that turn and then the set of steps within that phase. Game class also has an attribute card_effects that is a 
+    dictionary containing functions representing the unique effects of each card which has an effect.
+    """
 
     def __init__(self):
         """Initializes two players with unique decks and a new game board, setting the game state to in
@@ -18,7 +25,24 @@ class Game:
         self.opposing_player = (self.p1 if self.current_player == self.p2 else self.p2)
         self.board = Board()
         self.turn_count = 0
-        self.card_effects = {"Oozaki": oozaki_eff, "Dian Keto the Cure Master": dian_keto_eff}
+        self.card_effects = {"The Wicked Worm Beast": the_wicked_worm_beast_eff, "Lord of D.": lord_of_d_eff,
+                             "Mysterious Puppeteer": mysterious_puppeteer_eff, "Hane-Hane": hane_hane_eff, "Sogen":
+                                 sogen_eff, "Flute of Summoning Dragon":
+                                 flute_of_summoning_dragon_eff, "Ancient Telescope": ancient_telescope_eff,
+                             "Inexperienced Spy": inexperienced_spy_eff, "De-Spell": de_spell_eff, "Fissure":
+                                 fissure_eff, "Oozaki": oozaki_eff, "Dark Hole": dark_hole_eff, "Invigoration":
+                                 invigoration_eff, "Dark Energy": dark_energy_eff, "Ultimate Offering":
+                                 ultimate_offering_eff, "Castle Walls": castle_walls_eff, "Reverse Trap":
+                                 reverse_trap_eff, "Just Desserts": just_desserts_eff, "The Stern Mystic":
+                                 the_stern_mystic_eff, "Wall of Illusion": wall_of_illusion_eff, "Trap Master":
+                                 trap_master_eff, "Man-Eater Bug": man_eater_bug_eff, "Monster Reborn":
+                                 monster_reborn_eff, "Remove Trap": remove_trap_eff, "Sword of Dark Destruction":
+                                 sword_of_dark_destruction_eff, "Book of Secret Arts": book_of_secret_arts_eff,
+                             "Dian Keto the Cure Master": dian_keto_the_cure_master_eff, "Change of Heart":
+                                 change_of_heart_eff, "Last Will": last_will_eff, "Soul Exchange": soul_exchange_eff,
+                             "Card Destruction": card_destruction_eff, "Yami": yami_eff, "Reinforcements":
+                                 reinforcements_eff, "Two-Pronged Attack": two_pronged_attack_eff, "Trap Hole":
+                                 trap_hole_eff, "Dragon Capture Jar": dragon_capture_jar_eff, "Waboku": waboku_eff}
 
     def start_game(self):
         """Shuffles both player decks, deals hands, and provides a welcome message explaining the basic gameplay."""
