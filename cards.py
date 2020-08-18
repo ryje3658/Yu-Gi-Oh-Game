@@ -1,6 +1,175 @@
 from game_objects import *
 
 
+# Card effects for individual cards- each effect is unique and manipulates the game/board/cards in different ways.
+def monster_reborn_eff():
+    pass
+
+
+def wicked_worm_eff():
+    pass
+
+
+def lord_of_d_eff():
+    pass
+
+
+def mysterious_puppeteer_eff():
+    pass
+
+
+def trap_master_eff():
+    pass
+
+
+def hane_hane_eff():
+    pass
+
+
+def dark_energy_eff():
+    pass
+
+
+def invigoration_eff():
+    pass
+
+
+def dark_hole_eff(game):
+    """Dark hole card destroys all monster on the field."""
+    monsters_to_destroy = [x for x in [game.board.p1_monster_1, game.board.p1_monster_2, game.board.p1_monster_3,
+                           game.board.p1_monster_4, game.board.p1_monster_5, game.board.p2_monster_1,
+                           game.board.p2_monster_2, game.board.p2_monster_3, game.board.p2_monster_4,
+                           game.board.p2_monster_5] if isinstance(x, Monster)]
+    # for i in vars(game.board):
+    #     # Find monster to be removed
+    #     if vars(game.board)[i] == monster:
+    #         # Set that board's spot to the empty placeholder, removing monster from the board
+    #         vars(game.board)[i] = game.board.empty_placeholder
+    #         # Set monster as sent to graveyard this turn
+    #         monster.sent_to_grave_this_turn = True
+    #         # Send monster to the correct graveyard
+    #         if player_indicator_num == 0:
+    #             game.current_player.graveyard.append(monster)
+    #             print(colored(f"{monster} sent to {game.current_player}'s graveyard.\n", "red"))
+    #         else:
+    #             game.opposing_player.graveyard.append(monster)
+    #             print(colored(f"{monster} sent to {game.opposing_player}'s graveyard.\n", "red"))
+
+
+def oozaki_eff(game):
+    """Oozaki card inflicts 800 points of direct damage to opponent's life points."""
+    game.opposing_player.life_points -= 800
+
+
+def fissure_eff():
+    pass
+
+
+def trap_hole_eff():
+    pass
+
+
+def two_pronged_attack_eff():
+    pass
+
+
+def despell_eff():
+    pass
+
+
+def inexperienced_spy_eff():
+    pass
+
+
+def reinforcements_eff():
+    pass
+
+
+def ancient_telescope_eff():
+    pass
+
+
+def just_desserts_eff():
+    pass
+
+
+def remove_trap_eff():
+    pass
+
+
+def sogen_eff():
+    pass
+
+
+def flute_eff():
+    pass
+
+
+def ultimate_offering_eff():
+    pass
+
+
+def castle_wall_eff():
+    pass
+
+
+def reverse_trap_eff():
+    pass
+
+
+def man_eater_bug_eff():
+    pass
+
+
+def stern_mystic_eff():
+    pass
+
+
+def wall_of_illusion_eff():
+    pass
+
+
+def sword_of_dark_destruction_eff():
+    pass
+
+
+def book_of_secret_arts_eff():
+    pass
+
+
+def dian_keto_eff(game):
+    """Dian Keto card increases player's life points by 1000."""
+    game.current_player.life_points += 1000
+
+
+def change_of_heart_eff():
+    pass
+
+
+def soul_exchange_eff():
+    pass
+
+
+def last_will_eff():
+    pass
+
+
+def card_destruction_eff():
+    pass
+
+
+def yami_eff():
+    pass
+
+
+def dragon_capture_jar_eff():
+    pass
+
+
+def waboku_eff():
+    pass
+
+
 # Kaiba Starter Deck Monster Cards
 blue_eyes = Monster("Blue-Eyes White Dragon", "Blue-Eyes ", None, 3000, 2500, 8, "Dragon", "Light")
 hitotsu = Monster("Hitotsu-Me Giant", "Hitotsu-Me", None, 1200, 1000, 4, "Beast-Warrior", "Earth")

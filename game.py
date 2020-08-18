@@ -18,6 +18,7 @@ class Game:
         self.opposing_player = (self.p1 if self.current_player == self.p2 else self.p2)
         self.board = Board()
         self.turn_count = 0
+        self.card_effects = {"Oozaki": oozaki_eff, "Dian Keto the Cure Master": dian_keto_eff}
 
     def start_game(self):
         """Shuffles both player decks, deals hands, and provides a welcome message explaining the basic gameplay."""
@@ -36,11 +37,6 @@ class Game:
         print(colored("________________________________________________", "green"))
         print(colored("________________________________________________", "green"))
         print("\n")
-
-    # Card effects for individual cards- each effect is unique and manipulates the game/board/cards in different ways.
-    def oozaki_effect(self):
-        """Oozaki card inflicts 800 points of direct damage to opponent's life points."""
-        self.opposing_player.life_points -= 800
 
     def draw_phase(self):
         """Player draws one card from their deck and adds it to their hand. Displays new hand to player. First player '
@@ -121,17 +117,19 @@ class Game:
                 print(colored("Invalid location, try again!", "red"))
             # Set magic or trap position to "FACEUP"
             card_to_activate.position = "FACEUP"
-            # Activate card's specific effect
-            print(type(self.card_effects[card_to_activate.name]))
-            print(card_to_activate, "effect activated!")
+            # Activate card's specific effect by calling function
+            card_effect_function = self.card_effects[card_to_activate.name]
+            card_effect_function(self)
+            print(card_to_activate, "effect activated!", card_effect_function.__doc__)
 
         def activate_magic_or_trap_from_hand(card_from_hand):
             """Activates the effect of a magic or trap card directly from the hand."""
             card_to_activate = card_from_hand
             if isinstance(card_to_activate, Magic or Trap or Equip or Field):
-                # Activate card's specific effect
-                card_to_activate.effect()
-                print(card_to_activate, "effect activated!")
+                # Activate card's specific effect by calling function
+                card_effect_function = self.card_effects[card_to_activate.name]
+                card_effect_function(self)
+                print(card_to_activate, "effect activated!", card_effect_function.__doc__)
                 # Move card to graveyard
                 self.current_player.graveyard.append(card_to_activate)
                 # Remove card from hand
