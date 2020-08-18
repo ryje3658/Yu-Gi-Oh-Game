@@ -27,8 +27,8 @@ class Game:
         print(colored("________________________________________________", "green"))
         print(colored("________________________________________________", "green"))
         print(colored(f"\nWelcome! Each player starts with {self.p1.life_points} life points. A coin has been flipped "
-                      f"and it has\nbeen decided that {self.current_player.name} will go first! Each turn, players will "
-                      f"have a drawing phase, main\nphase 1, battle phase, then main phase 2,"
+                      f"and it has\nbeen decided that {self.current_player.name} will go first! Each turn, players will"
+                      f" have a drawing phase, main\nphase 1, battle phase, then main phase 2,"
                       " where they will provide input according to the\nactions they'd like to take. The player who "
                       "reduces their opponent's life points to 0 or\ncauses their opponent to no longer have any cards "
                       "to draw wins.\n", "green"))
@@ -146,8 +146,8 @@ class Game:
                     ready_to_place = check_for_open_spot(abbrev, "monster", slot_number)
 
                     # Choose position of monster (attack, defense, face down defense)
-                    monster_position = input(colored("What position would you like your monster in? a for attack, d for "
-                                                     "defense or f for face-down defense.", "green"))
+                    monster_position = input(colored("What position would you like your monster in? a for attack, d for"
+                                                     " defense or f for face-down defense.", "green"))
                     if monster_position == "a":
                         monster.position = "ATK"
                     elif monster_position == "d":
@@ -284,7 +284,8 @@ class Game:
             Returns the monster declaring the attack.
             """
             print("These are your monsters that are able to attack:", able_to_attack)
-            user_input = input(colored(f"Please choose a monster [1 - {len(able_to_attack)}] to initiate attack.", "green"))
+            user_input = input(colored(f"Please choose a monster [1 - {len(able_to_attack)}] to initiate attack.",
+                                       "green"))
             if int(user_input) in range(1, len(able_to_attack) + 1):
                 return able_to_attack[int(user_input) - 1]
             else:
@@ -299,7 +300,8 @@ class Game:
                 return False
             else:
                 print("These are the monsters you can attack:", potential_targets)
-                user_input = input(colored(f"Please choose a monster [1 - {len(potential_targets)}] to attack.", "green"))
+                user_input = input(colored(f"Please choose a monster [1 - {len(potential_targets)}] to attack.",
+                                           "green"))
                 if int(user_input) in range(1, len(potential_targets) + 1):
                     return potential_targets[int(user_input) - 1]
                 else:
@@ -434,7 +436,8 @@ class Game:
 
     def all_monster_sent_grave_to_false(self):
         """Sets all monsters in the graveyards attribute (sent_to_grave_this_turn) to false, to allow for correct
-        gameplay moving forward."""
+        gameplay moving forward.
+        """
         for card in [self.p1.graveyard, self.p2.graveyard]:
             if isinstance(card, Monster):
                 card.sent_to_grave_this_turn = False
@@ -464,11 +467,8 @@ class Game:
     def display_life_points(self):
         """Displays both players' life points to the terminal."""
 
-        current_lp_str = f"{self.current_player.name}: {self.current_player.life_points} life points"
-        opposing_lp_str = f"{self.opposing_player.name}: {self.opposing_player.life_points} life points"
-
-        print(colored(current_lp_str, "magenta"))
-        print(colored(opposing_lp_str, "magenta"))
+        print(colored(f"{self.current_player.name}: {self.current_player.life_points} life points", "magenta"))
+        print(colored(f"{self.opposing_player.name}: {self.opposing_player.life_points} life points", "magenta"))
 
     def play_game(self):
         """Handles playing the game. Provides instructions turn by turn, accepting player input from terminal via
