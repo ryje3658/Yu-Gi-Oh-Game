@@ -163,7 +163,7 @@ class Board:
               self.p1_monster_5])
         print([self.p1_graveyard_display, self.p1_magic_1, self.p1_magic_2, self.p1_magic_3, self.p1_magic_4,
                self.p1_magic_5])
-        print("\n                             -----Yugi-----\n")
+        print("\n                                -----Yugi-----\n")
 
 
 class Player:

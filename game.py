@@ -20,18 +20,29 @@ class Game:
         self.turn_count = 0
 
     def start_game(self):
-        """Shuffles both player decks, deals hands, and provides a welcome message that says whose turn it is."""
+        """Shuffles both player decks, deals hands, and provides a welcome message explaining the basic gameplay."""
         for player in [self.p1, self.p2]:
             player.shuffle_and_start_hand()
-        print(f"\nWelcome! Each player starts with {self.p1.life_points} life points. A coin has been flipped and it "
-              f"has been decided that {self.current_player.name} will go first!")
+        print(colored("________________________________________________", "green"))
+        print(colored("________________________________________________", "green"))
+        print(colored("________________________________________________", "green"))
+        print(colored(f"\nWelcome! Each player starts with {self.p1.life_points} life points. A coin has been flipped "
+                      f"and it has\nbeen decided that {self.current_player.name} will go first! Each turn, players will "
+                      f"have a drawing phase, main\nphase 1, battle phase, then main phase 2,"
+                      " where they will provide input according to the\nactions they'd like to take. The player who "
+                      "reduces their opponent's life points to 0 or\ncauses their opponent to no longer have any cards "
+                      "to draw wins.\n", "green"))
+        print(colored("________________________________________________", "green"))
+        print(colored("________________________________________________", "green"))
+        print(colored("________________________________________________", "green"))
+        print("\n")
 
     def draw_phase(self):
         """Player draws one card from their deck and adds it to their hand. Displays new hand to player. First player '
         to move does not draw a card.
         """
         if self.turn_count != 0:
-            print("Drawing a card...")
+            print(colored("Drawing a card...", "blue"))
             time.sleep(1.25)
             self.current_player.hand.append(self.current_player.player_deck.pop())
 
@@ -47,10 +58,15 @@ class Game:
 
         def main_phase_user_input():
             """Prompts user to enter input based on potential actions they can take. Returns that input."""
-            print(colored("Possible actions to take...", "blue"))
-            print(f"Type [1-{len(self.current_player.hand)}]: to play a card your hand.\n"
-                  f"Type 'f': to activate a magic or trap card on the field or change the position of a monster.\n"
-                  f"Type 'x': to end the main phase.\n")
+            print("\n")
+            self.display_life_points()
+            self.board.display_board()
+            print(f"{self.current_player}'s hand: {self.current_player.hand}\n")
+            print(colored("MAIN PHASE -- Possible actions to take...", "magenta"))
+            print(colored(f"Type [1-{len(self.current_player.hand)}]: to play a card your hand.\n"
+                          f"Type 'f': to activate a magic or trap card on the field or change the position of "
+                          f"a monster.", "green"))
+            print(colored(f"Type 'x': to end the main phase.\n", "red"))
             action_input = input()
             return action_input
 
@@ -79,7 +95,8 @@ class Game:
                 return False
 
         def set_magic_or_trap(mag_trap):
-            slot_number = input(f"Which magic or trap slot would you like to place {mag_trap.name} in? [1-5]")
+            slot_number = input(colored(f"Which magic or trap slot would you like to place {mag_trap.name} in? [1-5]",
+                                        "green"))
             ready_to_place = check_for_open_spot(abbrev, "magic", slot_number)
             if not ready_to_place:
                 print(colored("Invalid location, try again!", "red"))
@@ -92,7 +109,8 @@ class Game:
 
         def activate_magic_or_trap():
             """Activates the effect of a magic or trap card on the field."""
-            slot_number = input(f"Which magic or trap card on the field would you like to activate? [1-5]")
+            slot_number = input(colored(f"Which magic or trap card on the field would you like to activate? [1-5]",
+                                        "green"))
             card_to_activate = check_for_set_magic_or_trap(abbrev, "magic", slot_number)
             if not card_to_activate:
                 print(colored("Invalid location, try again!", "red"))
@@ -123,12 +141,13 @@ class Game:
                 ready_to_place = False
                 while not int(slot_number) in range(1, 6) and not ready_to_place:
                     # Choose where to place monster on board
-                    slot_number = input(f"Which monster slot would you like to place {monster.name} in? [1-5]")
+                    slot_number = input(colored(f"Which monster slot would you like to place {monster.name} in? [1-5]",
+                                                "green"))
                     ready_to_place = check_for_open_spot(abbrev, "monster", slot_number)
 
                     # Choose position of monster (attack, defense, face down defense)
-                    monster_position = input("What position would you like your monster in? a for attack, d for defense"
-                                             " or f for face-down defense.")
+                    monster_position = input(colored("What position would you like your monster in? a for attack, d for "
+                                                     "defense or f for face-down defense.", "green"))
                     if monster_position == "a":
                         monster.position = "ATK"
                     elif monster_position == "d":
@@ -136,7 +155,7 @@ class Game:
                     elif monster_position == "f":
                         monster.position = "FD"
                     else:
-                        print("Invalid input try again!")
+                        print(colored("Invalid input try again!", "red"))
                         return
                 # Place monster on the board
                 setattr(self.board, ready_to_place, monster)
@@ -152,9 +171,9 @@ class Game:
             monster_slot_num = input("Please enter 1-5 to choose the monster you'd like to alter.")
             monster_on_field = check_for_monster(abbrev, "monster", monster_slot_num)
             if monster_on_field is not False:
-                desired_position = input("What position would you like the monster in?\n"
-                                         "'a' : attack\n"
-                                         "'d' : defense\n")
+                desired_position = input(colored("What position would you like the monster in?\n"
+                                                 "'a' : attack\n"
+                                                 "'d' : defense\n", "green"))
                 if desired_position == "a":
                     monster_on_field.position = "ATK"
                 elif desired_position == "d":
@@ -164,7 +183,8 @@ class Game:
 
         def change_card_on_field():
             """Prompts user to specify what kind of action they want to take on a card on the field."""
-            magic_or_monster = input("Type 'm' to select a monster card or 's' to select a magic or trap card.")
+            magic_or_monster = input(colored("Type 'm' to select a monster card or 's' to select a magic or trap card."
+                                             , "green"))
             # Change the position of a monster on the field.
             if magic_or_monster == 'm':
                 change_monster_position()
@@ -185,8 +205,8 @@ class Game:
                     summon_monster(card_to_play)
                 # Player chose to play a Trap or Magic Card
                 else:
-                    set_or_activate = input("Type s if you would like to set the magic/trap card or a if you would "
-                                            "like to activate the card now.")
+                    set_or_activate = input(colored("Type s if you would like to set the magic/trap card or a if you "
+                                                    "would like to activate the card now.", "green"))
                     # Set a magic or trap card on the field.
                     if set_or_activate == "s":
                         set_magic_or_trap(card_to_play)
@@ -212,16 +232,10 @@ class Game:
 
         # -- Main Phase -- Main Loop Logic --
         while True:
-            # Display the board, players' life points, and the current player's hand after each action
-            print("\n")
-            self.display_life_points()
-            self.board.display_board()
-            print(f"{self.current_player}'s hand: {self.current_player.hand}")
-
+            # Display the board, players' life points, and the current player's hand after each action.
             # Determine action to take depending on user input
             user_input = main_phase_user_input()
             if user_input == "x":
-                print("Ending main phase.")
                 return
             # Change card on the field
             elif user_input == "f":
@@ -256,12 +270,21 @@ class Game:
 
             return [x for x in all_current_monsters if x.position == "ATK" and x.attacked_this_turn is False]
 
+        def player_not_able_to_attack(all_current_monsters):
+            """Checks if player has no monsters able to attack. (All monsters are in defense position.) Returns True if
+            all monsters are in defense position, returns False otherwise.
+            """
+            for monster in all_current_monsters:
+                if monster.position == "ATK":
+                    return False
+            return True
+
         def select_monster_declaring_attack(able_to_attack):
             """Current player selects monster they'd like to initiate an attack from the list of valid monsters.
             Returns the monster declaring the attack.
             """
             print("These are your monsters that are able to attack:", able_to_attack)
-            user_input = input(f"Please choose a monster [1 - {len(able_to_attack)}] to initiate attack.")
+            user_input = input(colored(f"Please choose a monster [1 - {len(able_to_attack)}] to initiate attack.", "green"))
             if int(user_input) in range(1, len(able_to_attack) + 1):
                 return able_to_attack[int(user_input) - 1]
             else:
@@ -276,7 +299,7 @@ class Game:
                 return False
             else:
                 print("These are the monsters you can attack:", potential_targets)
-                user_input = input(f"Please choose a monster [1 - {len(potential_targets)}] to attack.")
+                user_input = input(colored(f"Please choose a monster [1 - {len(potential_targets)}] to attack.", "green"))
                 if int(user_input) in range(1, len(potential_targets) + 1):
                     return potential_targets[int(user_input) - 1]
                 else:
@@ -298,7 +321,8 @@ class Game:
             damage = direct_attacking_monster.attack
             self.opposing_player.life_points -= damage
             direct_attacking_monster.attacked_this_turn = True
-            print(f"{direct_attacking_monster} attacked {self.opposing_player} directly, inflicting {damage} damage!")
+            print(colored(f"{direct_attacking_monster} attacked {self.opposing_player} directly, inflicting {damage} "
+                          f"damage!", "red"))
 
         def damage_calc_update_life_points(atk_monster, tgt_monster):
             """Damage is calculated, life points are updated, and destroyed monsters are removed from the board and
@@ -307,8 +331,10 @@ class Game:
             damage_to_current_player = 0
             damage_to_opponent = 0
 
-            def remove_monster_from_field(monster, num):
-                """Removes the inputted monster from the board."""
+            def remove_monster_from_field(monster, player_indicator_num):
+                """Removes the inputted monster from the board. Adds it to the graveyard of the correct player
+                according to the player_indicator num.
+                """
                 for i in vars(self.board):
                     # Find monster to be removed
                     if vars(self.board)[i] == monster:
@@ -317,12 +343,12 @@ class Game:
                         # Set monster as sent to graveyard this turn
                         monster.sent_to_grave_this_turn = True
                         # Send monster to the correct graveyard
-                        if num == 0:
+                        if player_indicator_num == 0:
                             self.current_player.graveyard.append(monster)
-                            print(f"{monster} sent to {self.current_player}'s graveyard.")
+                            print(colored(f"{monster} sent to {self.current_player}'s graveyard.\n", "red"))
                         else:
                             self.opposing_player.graveyard.append(monster)
-                            print(f"{monster} sent to {self.opposing_player}'s graveyard.")
+                            print(colored(f"{monster} sent to {self.opposing_player}'s graveyard.\n", "red"))
 
             # Attacking defense position monster
             if tgt_monster.position == "DEF" or tgt_monster.position == "FD":
@@ -350,16 +376,23 @@ class Game:
             # Set the attacking monster's attribute of "attacked this turn" to True
             atk_monster.attacked_this_turn = True
 
-            # Update life points for each player after damage calculation
+            # Update life points for each player after damage calculation, inform users of damage done
             self.current_player.life_points = (self.current_player.life_points - damage_to_current_player)
             self.opposing_player.life_points = (self.opposing_player.life_points - damage_to_opponent)
+            print(colored(f"Battle resulted in {damage_to_current_player} damage to {self.current_player} and"
+                  f" {damage_to_opponent} damage to {self.opposing_player}!", "red"))
 
         # -- Battle Phase -- Main Logic Loop --
         while True:
             # No battle phase on the first player's turn
             if self.turn_count == 0:
                 break
-            print(colored("Type 'x' to end the battle phase or any other key to declare an attack.", "blue"))
+            elif player_not_able_to_attack(currents_monsters):
+                print(colored("You have no monsters able to attack this turn. Battle phase ended.", "red"))
+                break
+            print(colored("BATTLE PHASE -- Possible actions to take...", "magenta"))
+            print(colored("Type any key: to declare at attack.", "green"))
+            print(colored("Type 'x': to end the battle phase.", "red"))
             user_decision = input()
             if user_decision == 'x':
                 break
@@ -378,7 +411,7 @@ class Game:
                     damage_calc_update_life_points(monster_attacking, target_monster)
                 # Check if user has no more monsters able to attack
                 if len(monsters_able_to_attack(currents_monsters)) < 1:
-                    print(colored("Battle phase over. You have no more monsters able to attack.", "blue"))
+                    print(colored("Battle phase over. You have no more monsters able to attack.", "red"))
                     break
 
     def update_game_state(self):
@@ -445,9 +478,6 @@ class Game:
 
         # Main loop to run game.
         while True:
-            # Inform player of whose turn it is.
-            print(f"It is {self.current_player}'s turn.")
-
             # Draw phase
             self.draw_phase()
 
@@ -467,7 +497,7 @@ class Game:
                 break
 
             # Get ready for the opposite player's turn
-            print("Your turn is over...")
+            print(colored("Your turn is over...", "blue"))
             self.next_turn()
 
 
