@@ -254,7 +254,7 @@ class Game:
             Returns a list of monster objects that are able to attack this turn.
             """
 
-            return [x for x in all_current_monsters if x.position == "ATK"]
+            return [x for x in all_current_monsters if x.position == "ATK" and x.attacked_this_turn is False]
 
         def select_monster_declaring_attack(able_to_attack):
             """Current player selects monster they'd like to initiate an attack from the list of valid monsters.
@@ -269,7 +269,8 @@ class Game:
 
         def select_monster_to_attack(potential_targets):
             """Current player selects opponents' monster they'd like to attack. Returns that monster being attacked."""
-            if potential_targets is None:
+            potential_targets = [x for x in potential_targets if x.sent_to_grave_this_turn is False]
+            if not potential_targets:
                 direct_attack()
             else:
                 print("These are the monsters you can attack:", potential_targets)
@@ -289,21 +290,50 @@ class Game:
             damage_to_current_player = 0
             damage_to_opponent = 0
 
+            def remove_monster_from_field(monster, num):
+                """Removes the inputted monster from the board."""
+                for i in vars(self.board):
+                    # Find monster to be removed
+                    if vars(self.board)[i] == monster:
+                        # Set that board's spot to the empty placeholder, removing monster from the board
+                        vars(self.board)[i] = self.board.empty_placeholder
+                        # Set monster as sent to graveyard this turn
+                        monster.sent_to_grave_this_turn = True
+                        # Send monster to the correct graveyard
+                        if num == 0:
+                            self.current_player.graveyard.append(monster)
+                            print(f"{monster} sent to {self.current_player}'s graveyard.")
+                        else:
+                            self.opposing_player.graveyard.append(monster)
+                            print(f"{monster} sent to {self.opposing_player}'s graveyard.")
+
             # Attacking defense position monster
-            if tgt_monster.position == "DEF" or "FD":
+            if tgt_monster.position == "DEF" or tgt_monster.position == "FD":
                 # Attack > defense -- remove the defense monster from the field
                 if atk_monster.attack - tgt_monster.defense > 0:
                     # Remove the defense position monster from the field
-                    pass
+                    remove_monster_from_field(tgt_monster, 1)
                 # Attack <= defense -- attacking player takes damage equal to difference, both monsters remain on field
                 else:
                     damage_to_current_player += (tgt_monster.defense - atk_monster.attack)
+            # Attacking attack position monster
+            elif tgt_monster.position == "ATK":
+                # Attack >= attack of target monster, calculate damage and remove target monster from field
+                if atk_monster.attack >= tgt_monster.attack:
+                    damage_to_opponent += (atk_monster.attack - tgt_monster.attack)
+                    remove_monster_from_field(tgt_monster, 1)
+                # Attack < attack of target monster, calculate damage and remove attacking monster from field
+                else:
+                    damage_to_current_player += (tgt_monster.attack - atk_monster.attack)
+                    remove_monster_from_field(atk_monster, 0)
+            # Set the attacking monster's attribute of "attacked this turn" to True
+            atk_monster.attacked_this_turn = True
 
-            else:
-                pass
+            # Update life points for each player after damage calculation
+            self.current_player.life_points = (self.current_player.life_points - damage_to_current_player)
+            self.opposing_player.life_points = (self.opposing_player.life_points - damage_to_opponent)
 
         # -- Battle Phase -- Main Logic Loop --
-
         while True:
             # No battle phase on the first player's turn
             if self.turn_count == 0:
@@ -316,10 +346,8 @@ class Game:
                 attack_pos_monsters = monsters_able_to_attack(currents_monsters)
                 # Determine the attacking monster
                 monster_attacking = select_monster_declaring_attack(attack_pos_monsters)
-                print("monster attacking", monster_attacking)
                 # Determine the monster being attacked
                 target_monster = select_monster_to_attack(opponents_monsters)
-                print("target monster", target_monster)
                 # Damage calculation and update board
                 damage_calc_update_life_points(monster_attacking, target_monster)
 
@@ -339,12 +367,29 @@ class Game:
         else:
             pass
 
+    def all_monsters_attacked_to_false(self):
+        """Sets all monsters on the field (attacked_this_turn) attribute to False, to allow for next turn."""
+        for i in vars(self.board):
+            # Find monster to be removed
+            if isinstance(vars(self.board)[i], Monster):
+                vars(self.board)[i].attacked_this_turn = False
+
+    def all_monster_sent_grave_to_false(self):
+        """Sets all monsters in the graveyards attribute (sent_to_grave_this_turn) to false, to allow for correct
+        gameplay moving forward."""
+        for card in [self.p1.graveyard, self.p2.graveyard]:
+            if isinstance(card, Monster):
+                card.sent_to_grave_this_turn = False
+
     def next_turn(self):
-        """Prepare for next player's turn, changing current player, opposing player, incrementing turn count, and
-        resetting player's ability to summon a monster for their next turn.
+        """Prepare for next player's turn, changing current player, opposing player, incrementing turn count, resetting
+        player's ability to summon a monster for their next turn, setting all monsters attacked_this_turn and
+        sent_to_grave_this_turn attributes to False.
         """
         self.turn_count += 1
         self.current_player.summoned_monster_this_turn = False
+        self.all_monsters_attacked_to_false()
+        self.all_monster_sent_grave_to_false()
         if self.current_player == self.p1:
             self.current_player = self.p2
             self.opposing_player = self.p1
@@ -380,6 +425,7 @@ class Game:
 
             # Draw phase
             self.draw_phase()
+            print(vars(self.board))
 
             # Main Phase
             self.main_phase()
