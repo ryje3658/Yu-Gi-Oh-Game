@@ -37,6 +37,11 @@ class Game:
         print(colored("________________________________________________", "green"))
         print("\n")
 
+    # # Card effects for individual cards- each effect is unique and manipulates the game/board/cards in different ways.
+    # def oozaki_effect(self):
+    #     """Oozaki card inflicts 800 points of direct damage to opponent's life points."""
+    #     self.opposing_player.life_points -= 800
+
     def draw_phase(self):
         """Player draws one card from their deck and adds it to their hand. Displays new hand to player. First player '
         to move does not draw a card.
@@ -123,7 +128,7 @@ class Game:
         def activate_magic_or_trap_from_hand(card_from_hand):
             """Activates the effect of a magic or trap card directly from the hand."""
             card_to_activate = card_from_hand
-            if isinstance(card_to_activate, Magic or Trap):
+            if isinstance(card_to_activate, Magic or Trap or Equip or Field):
                 # Activate card's specific effect
                 card_to_activate.effect()
                 print(card_to_activate, "effect activated!")
@@ -200,6 +205,9 @@ class Game:
             """
             try:
                 card_to_play = self.current_player.hand[int(hand_input) - 1]
+            except IndexError:
+                print(colored("Please provide a valid index.", "red"))
+            else:
                 # Player chose to play a Monster card
                 if isinstance(card_to_play, Monster):
                     summon_monster(card_to_play)
@@ -215,8 +223,6 @@ class Game:
                         activate_magic_or_trap_from_hand(card_to_play)
                     else:
                         print(colored("Invalid input...please try again!", "red"))
-            except IndexError:
-                print(colored("Please provide a valid index.", "red"))
 
         def check_valid_hand_and_play(user_input_hand):
             """Checks if user input a value index to play a card from their hand, then plays that card or informs the
