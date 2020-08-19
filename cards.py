@@ -86,11 +86,27 @@ def reinforcements_eff(game):
 
 
 def ancient_telescope_eff(game):
-    pass
+    """Ancient telescope card allows you to see the top 5 cards or your opponent's deck."""
+    top_5_cards = game.opposing_player.player_deck.card_list[-5:]
+    top_5_correct_order = top_5_cards[::-1]
+    print(f"{game.opposing_player}'s top 5 cards: {top_5_correct_order}")
 
 
 def just_desserts_eff(game):
-    pass
+    """Inflicts 500 points of direct damage for each monster your opponent controls."""
+
+    # Generate list of opponents monster
+    if game.current_player == game.p1:
+        opponents_monsters = [x for x in [game.board.p2_monster_1, game.board.p2_monster_2, game.board.p2_monster_3,
+                                          game.board.p2_monster_4, game.board.p2_monster_5] if isinstance(x, Monster)]
+    else:
+        opponents_monsters = [x for x in [game.board.p1_monster_1, game.board.p1_monster_2, game.board.p1_monster_3,
+                                          game.board.p1_monster_4, game.board.p1_monster_5] if isinstance(x, Monster)]
+
+    # Take length of list, multiple by 500, inflict damage to opponent equal to the product
+    opponents_monster_count = len(opponents_monsters)
+    damage_to_life_points = 500 * opponents_monster_count
+    game.opposing_player.life_points -= damage_to_life_points
 
 
 def remove_trap_eff(game):
@@ -110,6 +126,7 @@ def ultimate_offering_eff(game):
 
 
 def castle_walls_eff(game):
+    print("castle walls!")
     pass
 
 
@@ -155,7 +172,27 @@ def last_will_eff(game):
 
 
 def card_destruction_eff(game):
-    pass
+    """Sends all cards from both players' hands to their graveyards. They draw the same number they discarded."""
+
+    # Save lengths of hands before card destruction activated
+    current_player_hand_length = len(game.current_player.hand) - 1
+    opposing_player_hand_length = len(game.opposing_player.hand)
+
+    # Save card objects
+    cards_in_current_hand = [card for card in game.current_player.hand]
+    cards_in_opp_hand = [card for card in game.opposing_player.hand]
+
+    # Iterate over both players cards in hand, sending each card to the graveyard
+    for card in cards_in_current_hand:
+        game.send_card_hand_to_graveyard(card)
+    for card in cards_in_opp_hand:
+        game.send_card_hand_to_graveyard(card)
+
+    # Add cards to players' hands equivalent to the number of cards they discarded
+    for i in range(current_player_hand_length):
+        game.current_player.hand.append(game.current_player.player_deck.pop())
+    for i in range(opposing_player_hand_length):
+        game.opposing_player.hand.append(game.opposing_player.player_deck.pop())
 
 
 def yami_eff(game):

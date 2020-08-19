@@ -149,7 +149,7 @@ class Game:
         def activate_magic_or_trap_from_hand(card_from_hand):
             """Activates the effect of a magic or trap card directly from the hand."""
             card_to_activate = card_from_hand
-            if isinstance(card_to_activate, Magic or Trap or Equip or Field):
+            if isinstance(card_to_activate, Magic) or isinstance(card_to_activate, Trap):
                 # Activate card's specific effect by calling function
                 card_effect_function = self.card_effects[card_to_activate.name]
                 card_effect_function(self)
@@ -469,6 +469,18 @@ class Game:
         for card in [self.p1.graveyard, self.p2.graveyard]:
             if isinstance(card, Monster):
                 card.sent_to_grave_this_turn = False
+
+    def send_card_hand_to_graveyard(self, card_to_send):
+        """Sends a card from a player's hand to their graveyard. Receives a card object and returns nothing."""
+        print("got to send card to graveyard:", card_to_send)
+        if card_to_send in self.current_player.hand:
+            self.current_player.hand.remove(card_to_send)
+            self.current_player.graveyard.append(card_to_send)
+        elif card_to_send in self.opposing_player.hand:
+            self.opposing_player.hand.remove(card_to_send)
+            self.opposing_player.graveyard.append(card_to_send)
+        else:
+            print(colored("Card is not in either player's hand!", "red"))
 
     def next_turn(self):
         """Prepare for next player's turn, changing current player, opposing player, incrementing turn count, resetting

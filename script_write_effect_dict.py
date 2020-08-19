@@ -1,6 +1,8 @@
 import gc
 from cards import *
 
+# Script to get all the names of the effect cards in format to paste into the Game.card_effects attribute
+
 unique_effect_cards = []
 output_string = "{"
 
