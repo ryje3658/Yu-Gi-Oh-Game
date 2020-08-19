@@ -3,7 +3,17 @@ from game_objects import *
 
 # Card effects for individual cards- each effect is unique and manipulates the game/board/cards in different ways.
 def monster_reborn_eff(game):
-    pass
+    """Choose a monster from either player's graveyard and special summon it to the field."""
+    monster_to_revive = game.choose_monster_from_both_graveyards()
+    monster_position = input("Please type 'a' to revive the monster in attack position or 'd' for defense position.")
+    if monster_position == 'a':
+        monster_to_revive.position = "ATK"
+    elif monster_position == 'd':
+        monster_to_revive.position = "DEF"
+    else:
+        print(colored("Incorrect input, reviving monster in the position it was destroyed in.", "red"))
+        pass
+    game.place_in_open_monster_spot(monster_to_revive)
 
 
 def the_wicked_worm_beast_eff(game):
@@ -96,12 +106,7 @@ def just_desserts_eff(game):
     """Inflicts 500 points of direct damage for each monster your opponent controls."""
 
     # Generate list of opponents monster
-    if game.current_player == game.p1:
-        opponents_monsters = [x for x in [game.board.p2_monster_1, game.board.p2_monster_2, game.board.p2_monster_3,
-                                          game.board.p2_monster_4, game.board.p2_monster_5] if isinstance(x, Monster)]
-    else:
-        opponents_monsters = [x for x in [game.board.p1_monster_1, game.board.p1_monster_2, game.board.p1_monster_3,
-                                          game.board.p1_monster_4, game.board.p1_monster_5] if isinstance(x, Monster)]
+    opponents_monsters = game.get_opposing_players_monsters()
 
     # Take length of list, multiple by 500, inflict damage to opponent equal to the product
     opponents_monster_count = len(opponents_monsters)
@@ -126,7 +131,8 @@ def ultimate_offering_eff(game):
 
 
 def castle_walls_eff(game):
-    print("castle walls!")
+    """Increases a monster's defense by 500 points for one turn."""
+
     pass
 
 
@@ -160,7 +166,14 @@ def dian_keto_the_cure_master_eff(game):
 
 
 def change_of_heart_eff(game):
-    pass
+    """Choose an opponent's monster to take control of."""
+    # Get target Monster
+    target_monster = game.choose_opponent_monster()
+
+    # Remove monster from opponents side of the field
+
+    # Place monster on current players side of the field
+    game.place_in_open_monster_spot(target_monster)
 
 
 def soul_exchange_eff(game):
@@ -204,7 +217,14 @@ def dragon_capture_jar_eff(game):
 
 
 def waboku_eff(game):
-    pass
+    """You take no battle damage and any monsters destroyed in battle are revived after battle phase."""
+    # Negate any damage taken this turn in battle
+    game.current_player.damage_taken_this_turn += game.current_player.life_points
+    for card in game.get_current_player_graveyard():
+        if isinstance(card, Monster):
+            if card.sent_to_grave_this_turn:
+                # Special summon monsters
+                pass
 
 
 # Kaiba Starter Deck Monster Cards
@@ -243,7 +263,7 @@ hane_hane = Monster("Hane-Hane", "Hane-Hane ", True, 450, 500, 2, "Beast", "Eart
 # Kaiba Starter Deck Magic Cards
 monster_reborn = Magic("Monster Reborn", "M. Reborn ", True)
 remove_trap = Magic("Remove Trap", "RemoveTrap", True)
-sogen = Field("Sogen", "   Sogen  ", True)
+sogen = Magic("Sogen", "   Sogen  ", True)
 flute_of_summoning_dragon = Magic("Flute of Summoning Dragon", "Flute - SD", True)
 ancient_telescope = Magic("Ancient Telescope", " Telescope", True)
 inexperienced_spy = Magic("Inexperienced Spy", "Inexpd Spy", True)
@@ -251,15 +271,15 @@ de_spell = Magic("De-Spell", " De-Spell ", True)
 fissure = Magic("Fissure", " Fissure  ", True)
 oozaki = Magic("Oozaki", " Oozaki  ", True)
 dark_hole = Magic("Dark Hole", "Dark Hole ", True)
-invigoration = Equip("Invigoration", "Invigorate", True)
-dark_energy = Equip("Dark Energy", "DarkEnergy", True)
+invigoration = Magic("Invigoration", "Invigorate", True)
+dark_energy = Magic("Dark Energy", "DarkEnergy", True)
 
 # Kaiba Starter Deck Trap Cards
 ultimate_offering = Trap("Ultimate Offering", "U.Offering", True, "Continuous")
 castle_walls = Trap("Castle Walls", "CastleWall", True, "Normal")
 reverse_trap = Trap("Reverse Trap", "Rev. Trap ", True, "Normal")
 just_desserts = Trap("Just Desserts", "J.Desserts", True, "Normal")
-reinforcements = Equip("Reinforcements", "Reinforce ", True)
+reinforcements = Magic("Reinforcements", "Reinforce ", True)
 two_pronged_attack = Trap("Two-Pronged Attack", "2P- Attack", True, "Normal")
 trap_hole = Trap("Trap Hole", "Trap Hole ", True, "Quick")
 
@@ -304,20 +324,20 @@ remove_trap2 = Magic("Remove Trap", "RemoveTrap", True)
 de_spell2 = Magic("De-Spell", " De-Spell ", True)
 fissure2 = Magic("Fissure", " Fissure  ", True)
 dark_hole2 = Magic("Dark Hole", "Dark Hole ", True)
-sword_of_dark = Equip("Sword of Dark Destruction", "Dark Sword", True)
-book_of_arts = Equip("Book of Secret Arts", "Secret Arts", True)
+sword_of_dark = Magic("Sword of Dark Destruction", "Dark Sword", True)
+book_of_arts = Magic("Book of Secret Arts", "Secret Arts", True)
 dian_keto = Magic("Dian Keto the Cure Master", "Dian Keto ", True)
 change_of_heart = Magic("Change of Heart", "Chng Heart", True)
 last_will = Magic("Last Will", "Last Will ", True)
 soul_ex = Magic("Soul Exchange", "Soul Exchg", True)
 card_destruction = Magic("Card Destruction", "Card Destr", True)
-yami = Field("Yami", "   Yami   ", True)
+yami = Magic("Yami", "   Yami   ", True)
 
 # Yugi Starter Deck Trap Cards
 ultimate_offering2 = Trap("Ultimate Offering", "U.Offering", True, "Continuous")
 castle_walls2 = Trap("Castle Walls", "CastleWall", True, "Normal")
 reverse_trap2 = Trap("Reverse Trap", "Rev. Trap ", True, "Normal")
-reinforcements2 = Equip("Reinforcements", "Reinforce ", True)
+reinforcements2 = Magic("Reinforcements", "Reinforce ", True)
 two_pronged_attack2 = Trap("Two-Pronged Attack", "2P- Attack", True, "Normal")
 trap_hole2 = Trap("Trap Hole", "Trap Hole ", True, "Quick")
 dragon_capture_jar = Trap("Dragon Capture Jar", "D Capt Jar", True, "Normal")

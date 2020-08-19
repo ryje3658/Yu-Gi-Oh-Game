@@ -392,6 +392,10 @@ class Game:
             # Set the attacking monster's attribute of "attacked this turn" to True
             atk_monster.attacked_this_turn = True
 
+            # Assign to player attribute for use with effect in card Waboku
+            self.current_player.damage_taken_this_turn = damage_to_current_player
+            self.opposing_player.damage_taken_this_turn = damage_to_opponent
+
             # Update life points for each player after damage calculation, inform users of damage done
             self.current_player.life_points = (self.current_player.life_points - damage_to_current_player)
             self.opposing_player.life_points = (self.opposing_player.life_points - damage_to_opponent)
@@ -443,6 +447,54 @@ class Game:
         else:
             pass
 
+    def choose_current_monster(self):
+        """Allows user to select one of their monsters from those on the field. Returns that monster."""
+        currents_monsters = self.get_current_players_monsters()
+        print("These are your monsters you can choose from:", currents_monsters)
+        user_input = input(colored(f"Please choose a monster [1 - {len(currents_monsters)}].",
+                                   "green"))
+        if int(user_input) in range(1, len(currents_monsters) + 1):
+            return currents_monsters[int(user_input) - 1]
+        else:
+            print(colored("Invalid index, please try again!", "red"))
+
+    def choose_monster_from_both_graveyards(self):
+        both_graveyards = self.get_current_player_graveyard() + self.get_opposing_player_graveyard()
+        both_graveyards = [x for x in both_graveyards if isinstance(x, Monster)]
+        print("These are the monsters you can choose from either graveyard:", both_graveyards)
+        user_input = input(colored(f"Please choose a monster [1 - {len(both_graveyards)}] to revive.",
+                                   "green"))
+        if int(user_input) in range(1, len(both_graveyards) + 1):
+            return both_graveyards[int(user_input) - 1]
+        else:
+            print(colored("Invalid index, please try again!", "red"))
+
+    def choose_opponent_monster(self):
+        """Allows user to select an opponent's monster from those on the field. Returns that monster."""
+        opponents_monsters = self.get_opposing_players_monsters()
+        print("These are your opponents monsters you can choose from:", opponents_monsters)
+        user_input = input(colored(f"Please choose a monster [1 - {len(opponents_monsters)}].",
+                                   "green"))
+        if int(user_input) in range(1, len(opponents_monsters) + 1):
+            return opponents_monsters[int(user_input) - 1]
+        else:
+            print(colored("Invalid index, please try again!", "red"))
+
+    def place_in_open_monster_spot(self, monster_to_place):
+        """Finds an open monster spot on the current players side of the field. Places monster_to_place in that spot
+        on the board.
+        """
+        if self.current_player == self.p1:
+            open_spots = ["p1_monster_1", "p1_monster_2", "p1_monster_3", "p1_monster_4", "p1_monster_5"]
+        else:
+            open_spots = ["p2_monster_1", "p2_monster_2", "p2_monster_3", "p2_monster_4", "p2_monster_5"]
+
+        for item in open_spots:
+            if not isinstance(item, Monster):
+                setattr(self.board, item, monster_to_place)
+                break
+        print(colored("You have no open spots to place a monster!", "red"))
+
     def all_monsters_attacked_to_false(self):
         """Sets all monsters on the field (attacked_this_turn) attribute to False, to allow for next turn."""
         for i in vars(self.board):
@@ -460,7 +512,6 @@ class Game:
 
     def send_card_hand_to_graveyard(self, card_to_send):
         """Sends a card from a player's hand to their graveyard. Receives a card object and returns nothing."""
-        print("got to send card to graveyard:", card_to_send)
         if card_to_send in self.current_player.hand:
             self.current_player.hand.remove(card_to_send)
             self.current_player.graveyard.append(card_to_send)
@@ -469,6 +520,22 @@ class Game:
             self.opposing_player.graveyard.append(card_to_send)
         else:
             print(colored("Card is not in either player's hand!", "red"))
+
+    def send_card_field_to_graveyard(self, card_to_send):
+        """Sends a card from the field to the owner's graveyard. Receives a card object and returns nothing."""
+        pass
+
+    def summon_monster_from_graveyard(self, monster_to_summon):
+        """Summons a monster from the graveyard to the field."""
+        pass
+
+    def get_current_player_graveyard(self):
+        """Returns the current player's graveyard as a list of Card objects."""
+        return self.current_player.graveyard
+
+    def get_opposing_player_graveyard(self):
+        """Returns the current player's graveyard as a list of Card objects."""
+        return self.opposing_player.graveyard
 
     def get_current_players_monsters(self):
         """Returns a list of the current players monsters on the field."""

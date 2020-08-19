@@ -83,33 +83,33 @@ class Magic(Card):
         return colored(self.name, "green")
 
 
-class Equip(Magic):
-    """Equip Magic Card object."""
-
-    """Inherits from Magic class, name, ten character name, and effect. Equip are represented in green text in the game 
-    for clarity.
-    """
-
-    def __init__(self, name, ten_char_name, effect):
-        super().__init__(name, ten_char_name, effect)
-        self.target_monster = None
-
-    def __repr__(self):
-        return colored(self.name, "green")
-
-
-class Field(Card):
-    """Field Magic Card object."""
-
-    """Inherits from Magic class, name, ten character name, and effect. Magic are represented in green text in the game 
-    for clarity.
-    """
-
-    def __init__(self, name, ten_char_name, effect):
-        super().__init__(name, ten_char_name, effect)
-
-    def __repr__(self):
-        return colored(self.name, "green")
+# class Equip(Magic):
+#     """Equip Magic Card object."""
+#
+#     """Inherits from Magic class, name, ten character name, and effect. Equip are represented in green text in the game
+#     for clarity.
+#     """
+#
+#     def __init__(self, name, ten_char_name, effect):
+#         super().__init__(name, ten_char_name, effect)
+#         self.target_monster = None
+#
+#     def __repr__(self):
+#         return colored(self.name, "green")
+#
+#
+# class Field(Card):
+#     """Field Magic Card object."""
+#
+#     """Inherits from Magic class, name, ten character name, and effect. Magic are represented in green text in the game
+#     for clarity.
+#     """
+#
+#     def __init__(self, name, ten_char_name, effect):
+#         super().__init__(name, ten_char_name, effect)
+#
+#     def __repr__(self):
+#         return colored(self.name, "green")
 
 
 class Deck:
@@ -221,6 +221,7 @@ class Player:
         self.hand = []
         self.graveyard = []
         self.summoned_monster_this_turn = False
+        self.damage_taken_this_turn = 0
 
     def shuffle_and_start_hand(self):
         """Shuffles player's deck then deals 5 cards to create their starting hand."""
