@@ -87,7 +87,7 @@ class Game:
             self.display_life_points()
             self.board.display_board()
             print(f"{self.current_player}'s hand: {self.current_player.hand}\n")
-            print(colored("MAIN PHASE -- Possible actions to take...", "magenta"))
+            print(colored(f"{self.phase} -- Possible actions to take...", "magenta"))
             print(colored(f"Type [1-{len(self.current_player.hand)}]: to play a card your hand.\n"
                           f"Type 'f': to activate a magic or trap card on the field or change the position of "
                           f"a monster.", "green"))
@@ -410,7 +410,7 @@ class Game:
             elif player_not_able_to_attack(self.get_current_players_monsters()):
                 print(colored("You have no monsters able to attack this turn. Battle phase ended.", "red"))
                 break
-            print(colored("BATTLE PHASE -- Possible actions to take...", "magenta"))
+            print(colored(f"{self.phase} -- Possible actions to take...", "magenta"))
             print(colored("Type 'f': to declare at attack.", "green"))
             print(colored("Type 'x': to end the battle phase.", "red"))
             user_decision = input()
@@ -493,7 +493,6 @@ class Game:
             if not isinstance(item, Monster):
                 setattr(self.board, item, monster_to_place)
                 break
-        print(colored("You have no open spots to place a monster!", "red"))
 
     def all_monsters_attacked_to_false(self):
         """Sets all monsters on the field (attacked_this_turn) attribute to False, to allow for next turn."""
@@ -524,6 +523,18 @@ class Game:
     def send_card_field_to_graveyard(self, card_to_send):
         """Sends a card from the field to the owner's graveyard. Receives a card object and returns nothing."""
         pass
+
+    def monster_to_blank_space(self, card):
+        """Removes Monster from the board without sending it anywhere. Replaces monster with empty placeholder. Receives
+        monster object and returns nothing.
+        """
+        monster_spots = ["p1_monster_1", "p1_monster_2", "p1_monster_3", "p1_monster_4", "p1_monster_5",
+                         "p2_monster_1", "p2_monster_2", "p2_monster_3", "p2_monster_4", "p2_monster_5"]
+
+        for i in monster_spots:
+            if getattr(self.board, i) == card:
+                setattr(self.board, i, self.board.empty_placeholder)
+                break
 
     def summon_monster_from_graveyard(self, monster_to_summon):
         """Summons a monster from the graveyard to the field."""
@@ -594,15 +605,19 @@ class Game:
         # Main loop to run game.
         while True:
             # Draw phase
+            self.phase = "DRAW PHASE"
             self.draw_phase()
 
             # Main Phase
+            self.phase = "MAIN PHASE 1"
             self.main_phase()
 
             # Battle Phase
+            self.phase = "BATTLE PHASE"
             self.battle_phase()
 
             # Main Phase 2
+            self.phase = "MAIN PHASE 2"
             self.main_phase()
 
             # Update game state and then check for win, display message if win

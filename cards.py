@@ -169,9 +169,8 @@ def change_of_heart_eff(game):
     """Choose an opponent's monster to take control of."""
     # Get target Monster
     target_monster = game.choose_opponent_monster()
-
     # Remove monster from opponents side of the field
-
+    game.monster_to_blank_space(target_monster)
     # Place monster on current players side of the field
     game.place_in_open_monster_spot(target_monster)
 
