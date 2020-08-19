@@ -149,17 +149,18 @@ class Game:
             card_effect_function = self.card_effects[card_to_activate.name]
             print(card_to_activate, "effect activated!", card_effect_function.__doc__)
             card_effect_function(self)
+            # Send card from field to the graveyard
+            self.send_magic_field_to_graveyard(card_to_activate)
 
-        def activate_magic_or_trap_from_hand(card_from_hand):
+        def activate_magic_or_trap_from_hand(card_to_activate):
             """Activates the effect of a magic or trap card directly from the hand."""
-            card_to_activate = card_from_hand
             if isinstance(card_to_activate, Magic) or isinstance(card_to_activate, Trap):
                 # Activate card's specific effect by calling function
                 card_effect_function = self.card_effects[card_to_activate.name]
                 print(card_to_activate, "effect activated!", card_effect_function.__doc__)
                 card_effect_function(self)
                 # Move card to graveyard
-                self.current_player.graveyard.append(card_to_activate)
+                self.get_current_player_graveyard().append(card_to_activate)
                 # Remove card from hand
                 self.current_player.hand.remove(card_to_activate)
             else:
@@ -510,7 +511,7 @@ class Game:
             print(colored("Card is not in either player's hand!", "red"))
 
     def send_monster_field_to_graveyard(self, monster):
-        """Sends a card from the field to the owner's graveyard. Receives a card object and returns nothing."""
+        """Sends monster card from field to the owner's graveyard. Receives monster card object and returns nothing."""
         for i in vars(self.board):
             # Find monster to be removed
             if vars(self.board)[i] == monster:
@@ -531,6 +532,23 @@ class Game:
                 else:
                     self.opposing_player.graveyard.append(monster)
                     print(colored(f"{monster} sent to {self.opposing_player}'s graveyard.\n", "red"))
+
+    def send_magic_field_to_graveyard(self, magic):
+        """Sends magic card from the field to the owner's graveyard. Receives magic card object and returns nothing."""
+        for i in vars(self.board):
+            if vars(self.board)[i] == magic:
+                if magic in self.get_current_players_magic_trap():
+                    to_graveyard = self.current_player
+                elif magic in self.get_opponents_magic_trap():
+                    to_graveyard = self.opposing_player
+                else:
+                    print(colored("Error!", "red"))
+                    return
+                vars(self.board)[i] = self.board.empty_placeholder
+                if to_graveyard == self.current_player:
+                    self.current_player.graveyard.append(magic)
+                else:
+                    self.opposing_player.graveyard.append(magic)
 
     def monster_to_blank_space(self, card):
         """Removes Monster from the board without sending it anywhere. Replaces monster with empty placeholder. Receives
@@ -571,6 +589,31 @@ class Game:
             opponents_monsters = [x for x in [self.board.p1_monster_1, self.board.p1_monster_2, self.board.p1_monster_3,
                                   self.board.p1_monster_4, self.board.p1_monster_5] if isinstance(x, Monster)]
         return opponents_monsters
+
+    def get_current_players_magic_trap(self):
+        """Returns a list of the current player's magic and trap cards on the field."""
+        if self.current_player == self.p1:
+            currents_mag_trap = [x for x in [self.board.p1_magic_1, self.board.p1_magic_2, self.board.p1_magic_3,
+                                 self.board.p1_magic_4, self.board.p1_magic_5] if isinstance(x, Magic) or
+                                 isinstance(x, Trap)]
+        else:
+            currents_mag_trap = [x for x in [self.board.p2_magic_1, self.board.p2_magic_2, self.board.p2_magic_3,
+                                 self.board.p2_magic_4, self.board.p2_magic_5] if isinstance(x, Monster) or
+                                 isinstance(x, Trap)]
+        return currents_mag_trap
+
+    def get_opponents_magic_trap(self):
+        """Returns a list of the current player's magic and trap cards on the field."""
+        if self.current_player != self.p1:
+            opponents_mag_trap = [x for x in [self.board.p1_magic_1, self.board.p1_magic_2, self.board.p1_magic_3,
+                                  self.board.p1_magic_4, self.board.p1_magic_5] if isinstance(x, Magic) or
+                                  isinstance(x, Trap)]
+        else:
+            opponents_mag_trap = [x for x in [self.board.p2_magic_1, self.board.p2_magic_2, self.board.p2_magic_3,
+                                  self.board.p2_magic_4, self.board.p2_magic_5] if isinstance(x, Monster) or
+                                  isinstance(x, Trap)]
+        return opponents_mag_trap
+
 
     def get_all_monsters_on_field(self):
         """Returns a list of all the monsters on the field, of both players."""
