@@ -277,20 +277,6 @@ class Game:
         that the opponent has no monsters, they are able to attack their opponent's life points directly.
         """
 
-        # Determines what monsters the current player and the opposing player have on the field.
-        if self.current_player == self.p1:
-            abbrev = "p1"
-            currents_monsters = [x for x in [self.board.p1_monster_1, self.board.p1_monster_2, self.board.p1_monster_3,
-                                 self.board.p1_monster_4, self.board.p1_monster_5] if isinstance(x, Monster)]
-            opponents_monsters = [x for x in [self.board.p2_monster_1, self.board.p2_monster_2, self.board.p2_monster_3,
-                                  self.board.p2_monster_4, self.board.p2_monster_5] if isinstance(x, Monster)]
-        else:
-            abbrev = "p2"
-            currents_monsters = [x for x in [self.board.p2_monster_1, self.board.p2_monster_2, self.board.p2_monster_3,
-                                 self.board.p2_monster_4, self.board.p2_monster_5] if isinstance(x, Monster)]
-            opponents_monsters = [x for x in [self.board.p1_monster_1, self.board.p1_monster_2, self.board.p1_monster_3,
-                                  self.board.p1_monster_4, self.board.p1_monster_5] if isinstance(x, Monster)]
-
         def monsters_able_to_attack(all_current_monsters):
             """Determines what monsters are able to attack this turn, by checking if they are in attack position.
             Returns a list of monster objects that are able to attack this turn.
@@ -417,32 +403,34 @@ class Game:
             # No battle phase on the first player's turn
             if self.turn_count == 0:
                 break
-            elif player_not_able_to_attack(currents_monsters):
+            elif player_not_able_to_attack(self.get_current_players_monsters()):
                 print(colored("You have no monsters able to attack this turn. Battle phase ended.", "red"))
                 break
             print(colored("BATTLE PHASE -- Possible actions to take...", "magenta"))
-            print(colored("Type any key: to declare at attack.", "green"))
+            print(colored("Type 'f': to declare at attack.", "green"))
             print(colored("Type 'x': to end the battle phase.", "red"))
             user_decision = input()
             if user_decision == 'x':
                 break
-            else:
+            elif user_decision == 'f':
                 # Determine set of possible monsters to attack
-                attack_pos_monsters = monsters_able_to_attack(currents_monsters)
+                attack_pos_monsters = monsters_able_to_attack(self.get_current_players_monsters())
                 # Determine the attacking monster
                 monster_attacking = select_monster_declaring_attack(attack_pos_monsters)
                 # Determine the monster being attacked
-                if opposing_monsters(opponents_monsters) is False:
+                if opposing_monsters(self.get_opposing_players_monsters()) is False:
                     # If opponent has no monsters left, direct attack on opponent is initiated
                     direct_attack(monster_attacking)
                 else:
-                    target_monster = select_monster_to_attack(opponents_monsters)
+                    target_monster = select_monster_to_attack(self.get_opposing_players_monsters())
                     # Damage calculation and update board
                     damage_calc_update_life_points(monster_attacking, target_monster)
                 # Check if user has no more monsters able to attack
-                if len(monsters_able_to_attack(currents_monsters)) < 1:
+                if len(monsters_able_to_attack(self.get_current_players_monsters())) < 1:
                     print(colored("Battle phase over. You have no more monsters able to attack.", "red"))
                     break
+            else:
+                print(colored("Invalid input! Please try again!", "red"))
 
     def update_game_state(self):
         """Checks if either player has ran out of life points or if either player is unable to draw a card. Updates the
@@ -481,6 +469,26 @@ class Game:
             self.opposing_player.graveyard.append(card_to_send)
         else:
             print(colored("Card is not in either player's hand!", "red"))
+
+    def get_current_players_monsters(self):
+        """Returns a list of the current players monsters on the field."""
+        if self.current_player == self.p1:
+            currents_monsters = [x for x in [self.board.p1_monster_1, self.board.p1_monster_2, self.board.p1_monster_3,
+                                 self.board.p1_monster_4, self.board.p1_monster_5] if isinstance(x, Monster)]
+        else:
+            currents_monsters = [x for x in [self.board.p2_monster_1, self.board.p2_monster_2, self.board.p2_monster_3,
+                                 self.board.p2_monster_4, self.board.p2_monster_5] if isinstance(x, Monster)]
+        return currents_monsters
+
+    def get_opposing_players_monsters(self):
+        """Returns a list of the opposing player's monsters on the field."""
+        if self.current_player == self.p1:
+            opponents_monsters = [x for x in [self.board.p2_monster_1, self.board.p2_monster_2, self.board.p2_monster_3,
+                                  self.board.p2_monster_4, self.board.p2_monster_5] if isinstance(x, Monster)]
+        else:
+            opponents_monsters = [x for x in [self.board.p1_monster_1, self.board.p1_monster_2, self.board.p1_monster_3,
+                                  self.board.p1_monster_4, self.board.p1_monster_5] if isinstance(x, Monster)]
+        return opponents_monsters
 
     def next_turn(self):
         """Prepare for next player's turn, changing current player, opposing player, incrementing turn count, resetting
