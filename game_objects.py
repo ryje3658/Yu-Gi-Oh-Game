@@ -86,7 +86,7 @@ class Magic(Card):
 # class Equip(Magic):
 #     """Equip Magic Card object."""
 #
-#     """Inherits from Magic class, name, ten character name, and effect. Equip are represented in green text in the game
+#     """Inherits from Magic class, name, ten character name, effect. Equip are represented in green text in the game
 #     for clarity.
 #     """
 #
@@ -101,7 +101,7 @@ class Magic(Card):
 # class Field(Card):
 #     """Field Magic Card object."""
 #
-#     """Inherits from Magic class, name, ten character name, and effect. Magic are represented in green text in the game
+#     """Inherits from Magic class, name, ten character name, effect. Magic are represented in green text in the game
 #     for clarity.
 #     """
 #

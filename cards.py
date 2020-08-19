@@ -6,14 +6,6 @@ def monster_reborn_eff(game):
     """Choose a monster from either player's graveyard and special summon it to the field."""
     monster_to_revive = game.choose_monster_from_both_graveyards()
     game.change_position(monster_to_revive)
-    # monster_position = input("Please type 'a' to revive the monster in attack position or 'd' for defense position.")
-    # if monster_position == 'a':
-    #     monster_to_revive.position = "ATK"
-    # elif monster_position == 'd':
-    #     monster_to_revive.position = "DEF"
-    # else:
-    #     print(colored("Incorrect input, reviving monster in the position it was destroyed in.", "red"))
-    #     pass
     game.place_in_open_monster_spot(monster_to_revive)
 
 
@@ -46,25 +38,9 @@ def invigoration_eff(game):
 
 
 def dark_hole_eff(game):
-    """Dark hole card destroys all monster on the field."""
-    monsters_to_destroy = [x for x in [game.board.p1_monster_1, game.board.p1_monster_2, game.board.p1_monster_3,
-                           game.board.p1_monster_4, game.board.p1_monster_5, game.board.p2_monster_1,
-                           game.board.p2_monster_2, game.board.p2_monster_3, game.board.p2_monster_4,
-                           game.board.p2_monster_5] if isinstance(x, Monster)]
-    # for i in vars(game.board):
-    #     # Find monster to be removed
-    #     if vars(game.board)[i] == monster:
-    #         # Set that board's spot to the empty placeholder, removing monster from the board
-    #         vars(game.board)[i] = game.board.empty_placeholder
-    #         # Set monster as sent to graveyard this turn
-    #         monster.sent_to_grave_this_turn = True
-    #         # Send monster to the correct graveyard
-    #         if player_indicator_num == 0:
-    #             game.current_player.graveyard.append(monster)
-    #             print(colored(f"{monster} sent to {game.current_player}'s graveyard.\n", "red"))
-    #         else:
-    #             game.opposing_player.graveyard.append(monster)
-    #             print(colored(f"{monster} sent to {game.opposing_player}'s graveyard.\n", "red"))
+    """Dark hole card sends all monster on the field to the graveyard."""
+    for monster in game.get_all_monsters_on_field():
+        game.send_monster_field_to_graveyard(monster)
 
 
 def oozaki_eff(game):
@@ -81,6 +57,20 @@ def trap_hole_eff(game):
 
 
 def two_pronged_attack_eff(game):
+    """Select and destroy 2 of your monsters and 1 of your opponent's monsters."""
+    # Check for current player having 2+ monsters and opponent having 1+ monster(s)
+    if len(game.get_current_players_monsters()) > 1 and len(game.get_opposing_players_monsters()) > 0:
+        # Choose monsters to sacrifice and send to graveyard
+        print("Choose two of your own monsters to sacrifice...")
+        game.send_monster_field_to_graveyard(game.choose_current_monster())
+        game.send_monster_field_to_graveyard(game.choose_current_monster())
+
+        # Choose opponent's monster to destroy and send to graveyard
+        print("Choose one of your opponents monsters to destroy...")
+        game.send_monster_field_to_graveyard(game.choose_opponent_monster())
+    else:
+        print(colored("Can't activate card effect at this time. Not enough monsters on the field.", "red"))
+
     pass
 
 
@@ -213,7 +203,10 @@ def yami_eff(game):
 
 
 def dragon_capture_jar_eff(game):
-    pass
+    """All face up Dragon-type monsters on the field are changed to defense position."""
+    for monster in game.get_all_monsters_on_field:
+        if monster.monster_type == "Dragon":
+            monster.position = "DEF"
 
 
 def waboku_eff(game):

@@ -67,9 +67,14 @@ class Game:
         to move does not draw a card.
         """
         if self.turn_count != 0:
-            print(colored("Drawing a card...", "blue"))
+            print(colored(f"{self.phase} -- Drawing a card...", "magenta"))
             time.sleep(1.25)
             self.current_player.hand.append(self.current_player.player_deck.pop())
+
+    def end_phase(self):
+        """Player has finished actions for their turn. Message displayed."""
+        print(colored(f"{self.phase} -- Your turn is over...", "magenta"))
+        time.sleep(1)
 
     def main_phase(self):
         """Players are able to place cards onto the field according to the rules. Players are also able to manipulate
@@ -139,12 +144,11 @@ class Game:
             card_to_activate = check_for_set_magic_or_trap(abbrev, "magic", slot_number)
             if not card_to_activate:
                 print(colored("Invalid location, try again!", "red"))
-            # Set magic or trap position to "FACEUP"
             card_to_activate.position = "FACEUP"
             # Activate card's specific effect by calling function
             card_effect_function = self.card_effects[card_to_activate.name]
-            card_effect_function(self)
             print(card_to_activate, "effect activated!", card_effect_function.__doc__)
+            card_effect_function(self)
 
         def activate_magic_or_trap_from_hand(card_from_hand):
             """Activates the effect of a magic or trap card directly from the hand."""
@@ -152,8 +156,8 @@ class Game:
             if isinstance(card_to_activate, Magic) or isinstance(card_to_activate, Trap):
                 # Activate card's specific effect by calling function
                 card_effect_function = self.card_effects[card_to_activate.name]
-                card_effect_function(self)
                 print(card_to_activate, "effect activated!", card_effect_function.__doc__)
+                card_effect_function(self)
                 # Move card to graveyard
                 self.current_player.graveyard.append(card_to_activate)
                 # Remove card from hand
@@ -184,14 +188,19 @@ class Game:
                     else:
                         print(colored("Invalid input try again!", "red"))
                         return
-                # Place monster on the board
-                setattr(self.board, ready_to_place, monster)
-                self.current_player.summoned_monster_this_turn = True
+                # Place monster on the board, checks if spot is occupied
+                try:
+                    setattr(self.board, ready_to_place, monster)
+                except TypeError:
+                    print(colored("Spot already occupied by another monster, please try again!", "red"))
+                else:
+                    self.current_player.summoned_monster_this_turn = True
+                    self.current_player.hand.remove(monster)
             # Prevent player from summoning multiple monsters in a turn
             elif self.current_player.summoned_monster_this_turn:
                 print(colored("You can't summon another monster this turn!", "red"))
             # Remove card from hand after card is placed on field.
-            self.current_player.hand.remove(monster)
+            # self.current_player.hand.remove(monster)
 
         def change_monster_position():
             """Changes the position attribute of a Monster on the field. (To attack or defense.)"""
@@ -269,6 +278,12 @@ class Game:
         that the opponent has no monsters, they are able to attack their opponent's life points directly.
         """
 
+        def battle_phase_input():
+            print(colored(f"{self.phase} -- Possible actions to take...", "magenta"))
+            print(colored("Type 'f': to declare at attack.", "green"))
+            print(colored("Type 'x': to end the battle phase.", "red"))
+            return input()
+
         def monsters_able_to_attack(all_current_monsters):
             """Determines what monsters are able to attack this turn, by checking if they are in attack position.
             Returns a list of monster objects that are able to attack this turn.
@@ -339,31 +354,12 @@ class Game:
             damage_to_current_player = 0
             damage_to_opponent = 0
 
-            def remove_monster_from_field(monster, player_indicator_num):
-                """Removes the inputted monster from the board. Adds it to the graveyard of the correct player
-                according to the player_indicator num.
-                """
-                for i in vars(self.board):
-                    # Find monster to be removed
-                    if vars(self.board)[i] == monster:
-                        # Set that board's spot to the empty placeholder, removing monster from the board
-                        vars(self.board)[i] = self.board.empty_placeholder
-                        # Set monster as sent to graveyard this turn
-                        monster.sent_to_grave_this_turn = True
-                        # Send monster to the correct graveyard
-                        if player_indicator_num == 0:
-                            self.current_player.graveyard.append(monster)
-                            print(colored(f"{monster} sent to {self.current_player}'s graveyard.\n", "red"))
-                        else:
-                            self.opposing_player.graveyard.append(monster)
-                            print(colored(f"{monster} sent to {self.opposing_player}'s graveyard.\n", "red"))
-
             # Attacking defense position monster
             if tgt_monster.position == "DEF" or tgt_monster.position == "FD":
                 # Attack > defense -- remove the defense monster from the field
                 if atk_monster.attack - tgt_monster.defense > 0:
                     # Remove the defense position monster from the field
-                    remove_monster_from_field(tgt_monster, 1)
+                    self.send_monster_field_to_graveyard(tgt_monster)
                 # Attack <= defense -- attacking player takes damage equal to difference, both monsters remain on field
                 else:
                     damage_to_current_player += (tgt_monster.defense - atk_monster.attack)
@@ -372,15 +368,15 @@ class Game:
                 # Attack > attack of target monster, calculate damage and remove target monster from field
                 if atk_monster.attack > tgt_monster.attack:
                     damage_to_opponent += (atk_monster.attack - tgt_monster.attack)
-                    remove_monster_from_field(tgt_monster, 1)
+                    self.send_monster_field_to_graveyard(tgt_monster)
                 # Attack of both monsters is equal, both monsters are removed from the field, no life point damage
                 elif atk_monster.attack == tgt_monster.attack:
-                    remove_monster_from_field(tgt_monster, 1)
-                    remove_monster_from_field(atk_monster, 0)
+                    self.send_monster_field_to_graveyard(tgt_monster)
+                    self.send_monster_field_to_graveyard(atk_monster)
                 # Attack < attack of target monster, calculate damage and remove attacking monster from field
                 else:
                     damage_to_current_player += (tgt_monster.attack - atk_monster.attack)
-                    remove_monster_from_field(atk_monster, 0)
+                    self.send_monster_field_to_graveyard(atk_monster)
             # Set the attacking monster's attribute of "attacked this turn" to True
             atk_monster.attacked_this_turn = True
 
@@ -394,33 +390,36 @@ class Game:
             print(colored(f"Battle resulted in {damage_to_current_player} damage to {self.current_player} and"
                   f" {damage_to_opponent} damage to {self.opposing_player}!", "red"))
 
+        def choose_monsters_to_battle():
+            """User selects a monster to attack and a target monster for the attack."""
+            # Determine set of possible monsters to attack
+            attack_pos_monsters = monsters_able_to_attack(self.get_current_players_monsters())
+            # Determine the attacking monster
+            monster_attacking = select_monster_declaring_attack(attack_pos_monsters)
+            # Determine the monster being attacked
+            if opposing_monsters(self.get_opposing_players_monsters()) is False:
+                # If opponent has no monsters left, direct attack on opponent is initiated
+                direct_attack(monster_attacking)
+            else:
+                target_monster = select_monster_to_attack(self.get_opposing_players_monsters())
+                # Damage calculation and update board
+                damage_calc_update_life_points(monster_attacking, target_monster)
+
         # -- Battle Phase -- Main Logic Loop --
         while True:
             # No battle phase on the first player's turn
             if self.turn_count == 0:
                 break
+            # Check if user has no monsters able to attack, end battle phase if so
             elif player_not_able_to_attack(self.get_current_players_monsters()):
                 print(colored("You have no monsters able to attack this turn. Battle phase ended.", "red"))
                 break
-            print(colored(f"{self.phase} -- Possible actions to take...", "magenta"))
-            print(colored("Type 'f': to declare at attack.", "green"))
-            print(colored("Type 'x': to end the battle phase.", "red"))
-            user_decision = input()
+            # User has decided to initiate an attack
+            user_decision = battle_phase_input()
             if user_decision == 'x':
                 break
             elif user_decision == 'f':
-                # Determine set of possible monsters to attack
-                attack_pos_monsters = monsters_able_to_attack(self.get_current_players_monsters())
-                # Determine the attacking monster
-                monster_attacking = select_monster_declaring_attack(attack_pos_monsters)
-                # Determine the monster being attacked
-                if opposing_monsters(self.get_opposing_players_monsters()) is False:
-                    # If opponent has no monsters left, direct attack on opponent is initiated
-                    direct_attack(monster_attacking)
-                else:
-                    target_monster = select_monster_to_attack(self.get_opposing_players_monsters())
-                    # Damage calculation and update board
-                    damage_calc_update_life_points(monster_attacking, target_monster)
+                choose_monsters_to_battle()
                 # Check if user has no more monsters able to attack
                 if len(monsters_able_to_attack(self.get_current_players_monsters())) < 1:
                     print(colored("Battle phase over. You have no more monsters able to attack.", "red"))
@@ -436,8 +435,6 @@ class Game:
             self.game_state = "Kaiba won!"
         elif self.p2.life_points <= 0 or self.p2.player_deck.is_empty():
             self.game_state = "Yugi won!"
-        else:
-            pass
 
     def choose_current_monster(self):
         """Allows user to select one of their monsters from those on the field. Returns that monster."""
@@ -512,9 +509,28 @@ class Game:
         else:
             print(colored("Card is not in either player's hand!", "red"))
 
-    def send_card_field_to_graveyard(self, card_to_send):
+    def send_monster_field_to_graveyard(self, monster):
         """Sends a card from the field to the owner's graveyard. Receives a card object and returns nothing."""
-        pass
+        for i in vars(self.board):
+            # Find monster to be removed
+            if vars(self.board)[i] == monster:
+                if monster in self.get_current_players_monsters():
+                    to_graveyard = self.current_player
+                elif monster in self.get_opposing_players_monsters():
+                    to_graveyard = self.opposing_player
+                else:
+                    print(colored("Error!", "red"))
+                    return
+                vars(self.board)[i] = self.board.empty_placeholder
+                # Set monster as sent to graveyard this turn
+                monster.sent_to_grave_this_turn = True
+                # Send monster to the correct graveyard
+                if to_graveyard == self.current_player:
+                    self.current_player.graveyard.append(monster)
+                    print(colored(f"{monster} sent to {self.current_player}'s graveyard.\n", "red"))
+                else:
+                    self.opposing_player.graveyard.append(monster)
+                    print(colored(f"{monster} sent to {self.opposing_player}'s graveyard.\n", "red"))
 
     def monster_to_blank_space(self, card):
         """Removes Monster from the board without sending it anywhere. Replaces monster with empty placeholder. Receives
@@ -527,10 +543,6 @@ class Game:
             if getattr(self.board, i) == card:
                 setattr(self.board, i, self.board.empty_placeholder)
                 break
-
-    def summon_monster_from_graveyard(self, monster_to_summon):
-        """Summons a monster from the graveyard to the field."""
-        pass
 
     def get_current_player_graveyard(self):
         """Returns the current player's graveyard as a list of Card objects."""
@@ -559,6 +571,10 @@ class Game:
             opponents_monsters = [x for x in [self.board.p1_monster_1, self.board.p1_monster_2, self.board.p1_monster_3,
                                   self.board.p1_monster_4, self.board.p1_monster_5] if isinstance(x, Monster)]
         return opponents_monsters
+
+    def get_all_monsters_on_field(self):
+        """Returns a list of all the monsters on the field, of both players."""
+        return self.get_current_players_monsters() + self.get_opposing_players_monsters()
 
     def change_position(self, monster):
         """Changes the position of a monster. (Not to be used when summoning monsters.)"""
@@ -602,7 +618,7 @@ class Game:
 
     def play_game(self):
         """Handles playing the game. Provides instructions turn by turn, accepting player input from terminal via
-        keystrokes.
+        keystrokes, updating game phase as turns unfold.
         """
         self.start_game()
 
@@ -624,14 +640,17 @@ class Game:
             self.phase = "MAIN PHASE 2"
             self.main_phase()
 
-            # Update game state and then check for win, display message if win
+            # Update game state and then check for win, display and break main game loop if game over
             self.update_game_state()
             if self.game_state != "In Progress...":
                 print(self.game_state)
                 break
 
+            # End Phase
+            self.phase = "END PHASE"
+            self.end_phase()
+
             # Get ready for the opposite player's turn
-            print(colored("Your turn is over...", "blue"))
             self.next_turn()
 
 
