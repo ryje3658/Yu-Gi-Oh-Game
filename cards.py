@@ -5,14 +5,15 @@ from game_objects import *
 def monster_reborn_eff(game):
     """Choose a monster from either player's graveyard and special summon it to the field."""
     monster_to_revive = game.choose_monster_from_both_graveyards()
-    monster_position = input("Please type 'a' to revive the monster in attack position or 'd' for defense position.")
-    if monster_position == 'a':
-        monster_to_revive.position = "ATK"
-    elif monster_position == 'd':
-        monster_to_revive.position = "DEF"
-    else:
-        print(colored("Incorrect input, reviving monster in the position it was destroyed in.", "red"))
-        pass
+    game.change_position(monster_to_revive)
+    # monster_position = input("Please type 'a' to revive the monster in attack position or 'd' for defense position.")
+    # if monster_position == 'a':
+    #     monster_to_revive.position = "ATK"
+    # elif monster_position == 'd':
+    #     monster_to_revive.position = "DEF"
+    # else:
+    #     print(colored("Incorrect input, reviving monster in the position it was destroyed in.", "red"))
+    #     pass
     game.place_in_open_monster_spot(monster_to_revive)
 
 

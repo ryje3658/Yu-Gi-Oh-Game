@@ -198,15 +198,7 @@ class Game:
             monster_slot_num = input("Please enter 1-5 to choose the monster you'd like to alter.")
             monster_on_field = check_for_monster(abbrev, "monster", monster_slot_num)
             if monster_on_field is not False:
-                desired_position = input(colored("What position would you like the monster in?\n"
-                                                 "'a' : attack\n"
-                                                 "'d' : defense\n", "green"))
-                if desired_position == "a":
-                    monster_on_field.position = "ATK"
-                elif desired_position == "d":
-                    monster_on_field.position = "DEF"
-                else:
-                    print(colored("Invalid input. Please try again!", "red"))
+                self.change_position(monster_on_field)
 
         def change_card_on_field():
             """Prompts user to specify what kind of action they want to take on a card on the field."""
@@ -567,6 +559,18 @@ class Game:
             opponents_monsters = [x for x in [self.board.p1_monster_1, self.board.p1_monster_2, self.board.p1_monster_3,
                                   self.board.p1_monster_4, self.board.p1_monster_5] if isinstance(x, Monster)]
         return opponents_monsters
+
+    def change_position(self, monster):
+        """Changes the position of a monster. (Not to be used when summoning monsters.)"""
+        desired_position = input(colored("What position would you like the monster in?\n"
+                                         "'a' : attack\n"
+                                         "'d' : defense\n", "green"))
+        if desired_position == "a":
+            monster.position = "ATK"
+        elif desired_position == "d":
+            monster.position = "DEF"
+        else:
+            print(colored("Invalid input. Please try again!", "red"))
 
     def next_turn(self):
         """Prepare for next player's turn, changing current player, opposing player, incrementing turn count, resetting
