@@ -2,58 +2,110 @@ from game_objects import *
 
 
 # Card effects for individual cards- each effect is unique and manipulates the game/board/cards in different ways.
+# Functions return True when they successfully resolve, or False when they fail to resolve. Unique error messages
+# accompany each function to give player specific feedback of the conditions they failed to meet.
 def monster_reborn_eff(game):
     """Choose a monster from either player's graveyard and special summon it to the field."""
-    monster_to_revive = game.choose_monster_from_both_graveyards()
-    game.change_position(monster_to_revive)
-    game.place_in_open_monster_spot(monster_to_revive)
-
-
-def the_wicked_worm_beast_eff(game):
-    pass
-
-
-def lord_of_d_eff(game):
-    pass
-
-
-def mysterious_puppeteer_eff(game):
-    pass
-
-
-def trap_master_eff(game):
-    pass
-
-
-def hane_hane_eff(game):
-    pass
+    # Check that there is at least one monster in either graveyard
+    both_graveyards = game.get_current_player_graveyard() + game.get_opposing_player_graveyard()
+    both_graveyards = [x for x in both_graveyards if isinstance(x, Monster)]
+    if len(both_graveyards) > 0:
+        monster_to_revive = game.choose_monster_from_both_graveyards()
+        game.change_position(monster_to_revive)
+        game.place_in_open_monster_spot(monster_to_revive)
+        return True
+    else:
+        print(colored("There are no monsters in either player's graveyard!", "red"))
+        return False
 
 
 def dark_energy_eff(game):
-    pass
+    """Target one face up fiend monster on the field. It gains 300 attack and 300 defense."""
+    # Checks that there is at least one fiend monster.
+    for monster in game.get_current_players_monsters():
+        if monster.monster_type == "Fiend":
+            # Loops asking for input, until user chooses a Fiend monster to increase attack/defense of
+            while True:
+                print(colored("Choose a Fiend monster to gain 300 attack and 300 defense.", "green"))
+                monster = game.choose_current_monster()
+                if monster.monster_type == "Fiend":
+                    monster.attack += 300
+                    monster.defense += 300
+                    print(f"{monster}'s attack increased from {monster.attack-300} to {monster.attack}!\n"
+                          f"{monster}'s defense increased from {monster.defense-300} to {monster.defense}!")
+                    return True
+                else:
+                    print(colored("Must choose a Fiend type monster!", "red"))
+    else:
+        print(colored("Card effect could not be activated! You have no fiend monsters on the field!", "red"))
+        return False
 
 
 def invigoration_eff(game):
-    pass
+    """Target one face up earth monster on the field. It gains 400 attack and loses 200 defense."""
+    # Checks that there is at least one earth monster.
+    for monster in game.get_current_players_monsters():
+        if monster.attribute == "Earth":
+            # Loops asking for input, until user chooses a Earth monster to increase attack/defense of
+            while True:
+                print(colored("Choose an Earth monster to gain 400 attack and lose 200 defense.", "green"))
+                monster = game.choose_current_monster()
+                if monster.attribute == "Earth":
+                    monster.attack += 400
+                    monster.defense -= 200
+                    print(f"{monster}'s attack increased from {monster.attack - 400} to {monster.attack}!\n"
+                          f"{monster}'s defense decreased from {monster.defense} to {monster.defense - 200}!")
+                    return True
+                else:
+                    print(colored("Must choose an Earth type monster!", "red"))
+    else:
+        print(colored("Card effect could not be activated! You have no Earth monsters on the field!", "red"))
+        return False
 
 
 def dark_hole_eff(game):
-    """Dark hole card sends all monster on the field to the graveyard."""
+    """Sends all monster on the field to their respective graveyards."""
     for monster in game.get_all_monsters_on_field():
         game.send_monster_field_to_graveyard(monster)
+    return True
 
 
 def oozaki_eff(game):
-    """Oozaki card inflicts 800 points of direct damage to opponent's life points."""
+    """Inflicts 800 points of direct damage to opponent's life points."""
     game.opposing_player.life_points -= 800
+    print(f"{game.opposing_player} lost 800 life points!")
+    return True
 
 
 def fissure_eff(game):
-    pass
+    """Destroys opponent's monster with the lowest attack power."""
+    opponents_monsters = game.get_opposing_players_monsters()
+    if len(opponents_monsters) > 0:
+        weakest_monster = min(opponents_monsters, key=lambda x: x.attack)
+        game.send_monster_field_to_graveyard(weakest_monster)
+        return True
+    else:
+        print(colored("Can't activate card effect! Opponent has no monsters on the field!", "red"))
+        return False
 
 
 def trap_hole_eff(game):
-    pass
+    """Target one opponent your monster controls with >= 1000 attack and destroy that monster."""
+    for monster in game.get_opposing_players_monsters():
+        if monster.attack >= 1000:
+            # Loops asking for input, until user chooses a monster with >= 1000 attack to destroy
+            while True:
+                print(colored("Choose a monster with 1000 attack or more to destroy.", "green"))
+                monster = game.choose_opponent_monster()
+                if monster.attack >= 1000:
+                    game.send_monster_field_to_graveyard(monster)
+                    print(f"{monster} sent to graveyard!")
+                    return True
+                else:
+                    print(colored("Must choose a monster with 1000 attack or more to destroy!", "red"))
+    else:
+        print(colored("Card effect could not be activated! Opponent has no monsters with at least 1000 attack!", "red"))
+        return False
 
 
 def two_pronged_attack_eff(game):
@@ -61,36 +113,69 @@ def two_pronged_attack_eff(game):
     # Check for current player having 2+ monsters and opponent having 1+ monster(s)
     if len(game.get_current_players_monsters()) > 1 and len(game.get_opposing_players_monsters()) > 0:
         # Choose monsters to sacrifice and send to graveyard
-        print("Choose two of your own monsters to sacrifice...")
+        print(colored("Choose two of your own monsters to sacrifice...", "green"))
         game.send_monster_field_to_graveyard(game.choose_current_monster())
         game.send_monster_field_to_graveyard(game.choose_current_monster())
 
         # Choose opponent's monster to destroy and send to graveyard
-        print("Choose one of your opponents monsters to destroy...")
+        print(colored("Choose one of your opponents monsters to destroy...", "green"))
         game.send_monster_field_to_graveyard(game.choose_opponent_monster())
+        return True
     else:
         print(colored("Can't activate card effect at this time. Not enough monsters on the field.", "red"))
-
-    pass
+        return False
 
 
 def de_spell_eff(game):
-    pass
+    """Target one magic card on the field. Destroy it."""
+    opponents_spells = game.get_opponents_magic_trap()
+    for magic_or_trap in opponents_spells:
+        if isinstance(magic_or_trap, Magic):
+            while True:
+                print(colored("Choose a magic card to destroy.", "green"))
+                card = game.choose_opponent_magic_or_trap()
+                if isinstance(card, Magic):
+                    game.send_magic_field_to_graveyard(card)
+                    print(f"{card} sent to graveyard!")
+                    return True
+                else:
+                    print(colored("Must choose a magic card to destroy!", "red"))
+        else:
+            print(colored("Card effect could not be activated! Opponent has no magic cards.", "red"))
+            return False
 
 
 def inexperienced_spy_eff(game):
-    pass
+    """Select and see 1 card in your opponent's hand."""
+    hand_len = len(game.opposing_player.hand)
+    if hand_len > 0:
+        card_num = input(colored(f"Please choose a number in range [1-{hand_len}].", "green"))
+        print(f"The card you chose to see is: {game.opposing_player.hand[int(card_num)-1]}")
+        return True
+    else:
+        print(colored("Your opponent has no cards in their hand!", "red"))
+        return False
 
 
 def reinforcements_eff(game):
-    pass
+    """Target one face up monster on the field. It gains 500 attack."""
+    if len(game.get_current_players_monsters()) > 0:
+        print(colored("Choose a monster to gain 500 attack.", "green"))
+        monster = game.choose_current_monster()
+        monster.attack += 500
+        print(f"{monster}'s attack increased from {monster.attack-500} to {monster.attack}!")
+        return True
+    else:
+        print(colored("Card effect could not be activated! You have no monsters on the field!", "red"))
+        return False
 
 
 def ancient_telescope_eff(game):
-    """Ancient telescope card allows you to see the top 5 cards or your opponent's deck."""
+    """Allows you to see the top 5 cards or your opponent's deck."""
     top_5_cards = game.opposing_player.player_deck.card_list[-5:]
     top_5_correct_order = top_5_cards[::-1]
     print(f"{game.opposing_player}'s top 5 cards: {top_5_correct_order}")
+    return True
 
 
 def just_desserts_eff(game):
@@ -103,75 +188,188 @@ def just_desserts_eff(game):
     opponents_monster_count = len(opponents_monsters)
     damage_to_life_points = 500 * opponents_monster_count
     game.opposing_player.life_points -= damage_to_life_points
+    print(f"{game.opposing_player} lost {damage_to_life_points} life points!")
+    return True
 
 
 def remove_trap_eff(game):
-    pass
+    """Target one trap card on the field. Destroy it."""
+    opponents_spells = game.get_opponents_magic_trap()
+    for magic_or_trap in opponents_spells:
+        if isinstance(magic_or_trap, Trap):
+            while True:
+                print(colored("Choose a trap card to destroy.", "green"))
+                card = game.choose_opponent_magic_or_trap()
+                if isinstance(card, Trap):
+                    game.send_magic_field_to_graveyard(card)
+                    print(f"{card} sent to graveyard!")
+                    return True
+                else:
+                    print(colored("Must choose a trap card to destroy!", "red"))
+        else:
+            print(colored("Card effect could not be activated! Opponent has no trap cards.", "red"))
+            return False
 
 
 def sogen_eff(game):
-    pass
+    """All warrior and beast-warrior monsters on the field gain 200 attack and 200 defense."""
+    monsters = game.get_all_monsters_on_field()
+    for monster in monsters:
+        if monster.monster_type == "Warrior" or monster.monster_type == "Beast-Warrior":
+            monster.attack += 200
+            monster.defense += 200
+            print(f"{monster}'s attack and defense increased by 200!")
+    return True
 
 
 def flute_of_summoning_dragon_eff(game):
-    pass
+    """If Lord. of D. is on the field, you can summon up to two dragon monsters from your hand."""
+    for monster in game.get_all_monsters_on_field():
+        if monster.name == "Lord of D.":
+            for card in game.current_player.hand:
+                if isinstance(card, Monster) and card.monster_type == "Dragon":
+                    while True:
+                        print(colored("Choose a dragon to summon.", "green"))
+                        card = game.choose_monster_from_hand()
+                        if isinstance(card, Monster) and card.monster_type == "Dragon":
+                            game.place_in_open_monster_spot(card)
+                            print(f"{card} special summoned to the field!")
+                            for next_card in game.current_player.hand:
+                                if isinstance(next_card, Monster) and next_card.monster_type == "Dragon":
+                                    user_input = input(colored("Press 'a' to summon a second dragon or 'x' to finish "
+                                                               "using Flute of Summoning Dragon's effect.", "green"))
+                                    if user_input == 'a':
+                                        while True:
+                                            print(colored("Choose a dragon to summon.", "green"))
+                                            next_card = game.choose_monster_from_hand()
+                                            if isinstance(next_card, Monster) and next_card.monster_type == "Dragon":
+                                                game.place_in_open_monster_spot(next_card)
+                                                print(f"{next_card} special summoned to the field!")
+                                                break
+                                            else:
+                                                print(colored("Please choose a dragon to summon!", "red"))
+                                    elif user_input == 'x':
+                                        return True
+                                    else:
+                                        print(colored("Invalid input! Please try again!", "red"))
+                        else:
+                            print(colored("Must choose a dragon card to summon!", "red"))
+            else:
+                print(colored("Effect not activated! You have no dragon cards in your hand!", "red"))
+                return False
+        else:
+            print(colored("Card effect could not be activated! Lord of D. not on field.", "red"))
+            return False
 
 
 def ultimate_offering_eff(game):
-    pass
+    """Pay 500 life points to normal summon a monster. (Does not count as your turn's normal summon.)"""
+    for card in game.current_player.hand:
+        if isinstance(card, Monster):
+            game.current_player.life_points -= 500
+            print("You've paid 500 life points. You are allowed to summon a monster.")
+            monster = game.choose_monster_from_hand()
+            game.change_position(monster)
+            game.place_in_open_monster_spot(monster)
+            return True
+    print(colored("You have no monsters in your hand!", "red"))
+    return False
 
 
 def castle_walls_eff(game):
-    """Increases a monster's defense by 500 points for one turn."""
-
-    pass
-
-
-def reverse_trap_eff(game):
-    pass
-
-
-def man_eater_bug_eff(game):
-    pass
-
-
-def the_stern_mystic_eff(game):
-    pass
-
-
-def wall_of_illusion_eff(game):
-    pass
+    """Target one face up monster on the field. It gains 500 defense."""
+    if len(game.get_current_players_monsters()) > 0:
+        print(colored("Choose a monster to gain 500 defense.", "green"))
+        monster = game.choose_current_monster()
+        monster.defense += 500
+        print(f"{monster}'s defense increased from {monster.defense - 500} to {monster.defense}!")
+        return True
+    else:
+        print(colored("Card effect could not be activated! You have no monsters on the field!", "red"))
+        return False
 
 
 def sword_of_dark_destruction_eff(game):
-    pass
+    """Target one face up Dark monster on the field. It gains 400 attack and loses 200 defense."""
+    # Checks that there is at least one Dark monster.
+    for monster in game.get_current_players_monsters():
+        if monster.attribute == "Dark":
+            # Loops asking for input, until user chooses a Dark monster to increase attack/defense of
+            while True:
+                print(colored("Choose an Dark monster to gain 400 attack and loses 200 defense.", "green"))
+                monster = game.choose_current_monster()
+                if monster.attribute == "Dark":
+                    monster.attack += 400
+                    monster.defense -= 200
+                    print(f"{monster}'s attack increased from {monster.attack - 400} to {monster.attack}!\n"
+                          f"{monster}'s defense decreased from {monster.defense} to {monster.defense - 200}!")
+                    return True
+                else:
+                    print(colored("Must choose an Dark type monster!", "red"))
+    else:
+        print(colored("Card effect could not be activated! You have no Dark monsters on the field!", "red"))
+        return False
 
 
 def book_of_secret_arts_eff(game):
-    pass
+    """Target one face up Spellcaster monster on the field. It gains 300 attack and 300 defense."""
+    # Checks that there is at least one Spellcaster monster.
+    for monster in game.get_current_players_monsters():
+        if monster.monster_type == "Spellcaster":
+            # Loops asking for input, until user chooses a Spellcaster monster to increase attack/defense of
+            while True:
+                print(colored("Choose a Spellcaster monster to gain 300 attack and 300 defense.", "green"))
+                monster = game.choose_current_monster()
+                if monster.monster_type == "Spellcaster":
+                    monster.attack += 300
+                    monster.defense += 300
+                    print(f"{monster}'s attack increased from {monster.attack - 300} to {monster.attack}!\n"
+                          f"{monster}'s defense increased from {monster.defense - 300} to {monster.defense}!")
+                    return True
+                else:
+                    print(colored("Must choose a Spellcaster type monster!", "red"))
+    else:
+        print(colored("Card effect could not be activated! You have no Spellcaster monsters on the field!", "red"))
+        return False
 
 
 def dian_keto_the_cure_master_eff(game):
     """Dian Keto card increases player's life points by 1000."""
     game.current_player.life_points += 1000
+    print(f"{game.current_player} gained 1000 life points!")
+    return True
 
 
 def change_of_heart_eff(game):
     """Choose an opponent's monster to take control of."""
-    # Get target Monster
-    target_monster = game.choose_opponent_monster()
-    # Remove monster from opponents side of the field
-    game.monster_to_blank_space(target_monster)
-    # Place monster on current players side of the field
-    game.place_in_open_monster_spot(target_monster)
-
-
-def soul_exchange_eff(game):
-    pass
+    # Check that opponent has at least 1 monster
+    if len(game.get_opposing_players_monsters()) > 0:
+        # Get target Monster
+        target_monster = game.choose_opponent_monster()
+        # Remove monster from opponents side of the field
+        game.monster_to_blank_space(target_monster)
+        # Place monster on current players side of the field
+        game.place_in_open_monster_spot(target_monster)
+        return True
+    else:
+        print(colored("Opponent has no monsters!", "red"))
+        return False
 
 
 def last_will_eff(game):
-    pass
+    """If a monster on your side of the field was sent to the graveyard this turn, you can special summon 1 monster
+    with 1500 ATK points or less from your deck. Shuffle deck afterwards."""
+    if game.current_player.monster_sent_to_gy_this_turn:
+        monster_options = [x for x in game.current_player.player_deck if isinstance(x, Monster) and x.attack <= 1500]
+        monster_index = input(colored(f"Please enter a number from [1-{len(monster_options)}] "
+                                      f"to summon to the field.", "green"))
+        monster = monster_options[int(monster_index)-1]
+        game.place_in_open_monster_spot(monster)
+        print(f"You chose to revive {monster}!")
+        return True
+    else:
+        print(colored("Invalid! A monster was not sent from your side of the field to the graveyard this turn!", "red"))
+        return False
 
 
 def card_destruction_eff(game):
@@ -197,9 +395,22 @@ def card_destruction_eff(game):
     for i in range(opposing_player_hand_length):
         game.opposing_player.hand.append(game.opposing_player.player_deck.pop())
 
+    return True
+
 
 def yami_eff(game):
-    pass
+    """All fiend/spellcaster monsters on the field gain 200 attack/defense. Fairy monsters lose 200 attack/defense."""
+    monsters = game.get_all_monsters_on_field()
+    for monster in monsters:
+        if monster.monster_type == "Warrior" or monster.monster_type == "Beast-Warrior":
+            monster.attack += 200
+            monster.defense += 200
+            print(f"{monster}'s attack and defense increased by 200!")
+        elif monster.monster_type == "Fairy":
+            monster.attack -= 200
+            monster.defense -= 200
+            print(f"{monster}'s attack and defense decreased by 200!")
+    return True
 
 
 def dragon_capture_jar_eff(game):
@@ -207,6 +418,7 @@ def dragon_capture_jar_eff(game):
     for monster in game.get_all_monsters_on_field:
         if monster.monster_type == "Dragon":
             monster.position = "DEF"
+    return True
 
 
 def waboku_eff(game):
@@ -217,7 +429,47 @@ def waboku_eff(game):
         if isinstance(card, Monster):
             if card.sent_to_grave_this_turn:
                 # Special summon monsters
-                pass
+                return True
+
+
+def reverse_trap_eff(game):
+    pass
+
+
+def soul_exchange_eff(game):
+    pass
+
+
+def the_wicked_worm_beast_eff(game):
+    pass
+
+
+def lord_of_d_eff(game):
+    pass
+
+
+def mysterious_puppeteer_eff(game):
+    pass
+
+
+def trap_master_eff(game):
+    pass
+
+
+def hane_hane_eff(game):
+    pass
+
+
+def man_eater_bug_eff(game):
+    pass
+
+
+def the_stern_mystic_eff(game):
+    pass
+
+
+def wall_of_illusion_eff(game):
+    pass
 
 
 # Kaiba Starter Deck Monster Cards

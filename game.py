@@ -76,6 +76,233 @@ class Game:
         print(colored(f"{self.phase} -- Your turn is over...", "magenta"))
         time.sleep(1)
 
+    def update_game_state(self):
+        """Checks if either player has ran out of life points or if either player is unable to draw a card. Updates the
+        game state if either condition is met.
+        """
+        if self.p1.life_points <= 0 or self.p1.player_deck.is_empty():
+            self.game_state = "Kaiba won!"
+        elif self.p2.life_points <= 0 or self.p2.player_deck.is_empty():
+            self.game_state = "Yugi won!"
+
+    def choose_current_monster(self):
+        """Allows user to select one of their monsters from those on the field. Returns that monster."""
+        currents_monsters = self.get_current_players_monsters()
+        print("These are your monsters you can choose from:", currents_monsters)
+        user_input = input(colored(f"Please choose a monster [1 - {len(currents_monsters)}].",
+                                   "green"))
+        if int(user_input) in range(1, len(currents_monsters) + 1):
+            return currents_monsters[int(user_input) - 1]
+        else:
+            print(colored("Invalid index, please try again!", "red"))
+
+    def choose_opponent_monster(self):
+        """Allows user to select an opponent's monster from those on the field. Returns that monster."""
+        opponents_monsters = self.get_opposing_players_monsters()
+        print("These are your opponents monsters you can choose from:", opponents_monsters)
+        user_input = input(colored(f"Please choose a monster [1 - {len(opponents_monsters)}].",
+                                   "green"))
+        if int(user_input) in range(1, len(opponents_monsters) + 1):
+            return opponents_monsters[int(user_input) - 1]
+        else:
+            print(colored("Invalid index, please try again!", "red"))
+
+    def choose_monster_from_both_graveyards(self):
+        both_graveyards = self.get_current_player_graveyard() + self.get_opposing_player_graveyard()
+        both_graveyards = [x for x in both_graveyards if isinstance(x, Monster)]
+        print("These are the monsters you can choose from either graveyard:", both_graveyards)
+        user_input = input(colored(f"Please choose a monster [1 - {len(both_graveyards)}] to revive.",
+                                   "green"))
+        if int(user_input) in range(1, len(both_graveyards) + 1):
+            return both_graveyards[int(user_input) - 1]
+        else:
+            print(colored("Invalid index, please try again!", "red"))
+
+    def choose_monster_from_hand(self):
+        """Selects a monster to move from the hand to the field, in case of special summoning."""
+        currents_monsters = [x for x in self.current_player.hand if isinstance(x, Monster)]
+        print("These are the monsters in your hand you can choose from:", currents_monsters)
+        user_input = input(colored(f"Please choose a monster [1 - {len(currents_monsters)}].",
+                                   "green"))
+        if int(user_input) in range(1, len(currents_monsters) + 1):
+            return currents_monsters[int(user_input) - 1]
+        else:
+            print(colored("Invalid index, please try again!", "red"))
+
+    def place_in_open_monster_spot(self, monster_to_place):
+        """Finds an open monster spot on the current players side of the field. Places monster_to_place in that spot
+        on the board.
+        """
+        if self.current_player == self.p1:
+            open_spots = ["p1_monster_1", "p1_monster_2", "p1_monster_3", "p1_monster_4", "p1_monster_5"]
+        else:
+            open_spots = ["p2_monster_1", "p2_monster_2", "p2_monster_3", "p2_monster_4", "p2_monster_5"]
+
+        for item in open_spots:
+            if getattr(self.board, item) == self.board.empty_placeholder:
+                setattr(self.board, item, monster_to_place)
+                print(f"{monster_to_place} successfully summoned!")
+                return
+        print(colored("No spaces open to place a monster!", "red"))
+
+    def all_monsters_attacked_to_false(self):
+        """Sets all monsters on the field (attacked_this_turn) attribute to False, to allow for next turn."""
+        for i in vars(self.board):
+            # Find monster to be removed
+            if isinstance(vars(self.board)[i], Monster):
+                vars(self.board)[i].attacked_this_turn = False
+
+    def all_monster_sent_grave_to_false(self):
+        """Sets all monsters in the graveyards attribute (sent_to_grave_this_turn) to false, to allow for correct
+        gameplay moving forward.
+        """
+        for card in [self.p1.graveyard, self.p2.graveyard]:
+            if isinstance(card, Monster):
+                card.sent_to_grave_this_turn = False
+
+    def send_card_hand_to_graveyard(self, card_to_send):
+        """Sends a card from a player's hand to their graveyard. Receives a card object and returns nothing."""
+        if card_to_send in self.current_player.hand:
+            self.current_player.hand.remove(card_to_send)
+            self.current_player.graveyard.append(card_to_send)
+        elif card_to_send in self.opposing_player.hand:
+            self.opposing_player.hand.remove(card_to_send)
+            self.opposing_player.graveyard.append(card_to_send)
+        else:
+            print(colored("Card is not in either player's hand!", "red"))
+
+    def send_monster_field_to_graveyard(self, monster):
+        """Sends monster card from field to the owner's graveyard. Receives monster card object and returns nothing."""
+        for i in vars(self.board):
+            # Find monster to be removed
+            if vars(self.board)[i] == monster:
+                if monster in self.get_current_players_monsters():
+                    to_graveyard = self.current_player
+                elif monster in self.get_opposing_players_monsters():
+                    to_graveyard = self.opposing_player
+                else:
+                    print(colored("Error!", "red"))
+                    return
+                vars(self.board)[i] = self.board.empty_placeholder
+                # Set monster as sent to graveyard this turn and player attribute monster_sent_to_gy to True
+                monster.sent_to_grave_this_turn = True
+                self.current_player.monster_sent_to_gy_this_turn = True
+                # Send monster to the correct graveyard
+                if to_graveyard == self.current_player:
+                    self.current_player.graveyard.append(monster)
+                    print(colored(f"{monster} sent to {self.current_player}'s graveyard.\n", "red"))
+                else:
+                    self.opposing_player.graveyard.append(monster)
+                    print(colored(f"{monster} sent to {self.opposing_player}'s graveyard.\n", "red"))
+
+    def send_magic_field_to_graveyard(self, magic):
+        """Sends magic card from the field to the owner's graveyard. Receives magic card object and returns nothing."""
+        for i in vars(self.board):
+            if vars(self.board)[i] == magic:
+                if magic in self.get_current_players_magic_trap():
+                    to_graveyard = self.current_player
+                elif magic in self.get_opponents_magic_trap():
+                    to_graveyard = self.opposing_player
+                else:
+                    print(colored("Error!", "red"))
+                    return
+                vars(self.board)[i] = self.board.empty_placeholder
+                if to_graveyard == self.current_player:
+                    self.current_player.graveyard.append(magic)
+                else:
+                    self.opposing_player.graveyard.append(magic)
+
+    def monster_to_blank_space(self, card):
+        """Removes Monster from the board without sending it anywhere. Replaces monster with empty placeholder. Receives
+        monster object and returns nothing.
+        """
+        monster_spots = ["p1_monster_1", "p1_monster_2", "p1_monster_3", "p1_monster_4", "p1_monster_5",
+                         "p2_monster_1", "p2_monster_2", "p2_monster_3", "p2_monster_4", "p2_monster_5"]
+
+        for i in monster_spots:
+            if getattr(self.board, i) == card:
+                setattr(self.board, i, self.board.empty_placeholder)
+                break
+
+    def get_current_player_graveyard(self):
+        """Returns the current player's graveyard as a list of Card objects."""
+        return self.current_player.graveyard
+
+    def get_opposing_player_graveyard(self):
+        """Returns the current player's graveyard as a list of Card objects."""
+        return self.opposing_player.graveyard
+
+    def get_current_players_monsters(self):
+        """Returns a list of the current players monsters on the field."""
+        if self.current_player == self.p1:
+            currents_monsters = [x for x in [self.board.p1_monster_1, self.board.p1_monster_2, self.board.p1_monster_3,
+                                 self.board.p1_monster_4, self.board.p1_monster_5] if isinstance(x, Monster)]
+        else:
+            currents_monsters = [x for x in [self.board.p2_monster_1, self.board.p2_monster_2, self.board.p2_monster_3,
+                                 self.board.p2_monster_4, self.board.p2_monster_5] if isinstance(x, Monster)]
+        return currents_monsters
+
+    def get_opposing_players_monsters(self):
+        """Returns a list of the opposing player's monsters on the field."""
+        if self.current_player == self.p1:
+            opponents_monsters = [x for x in [self.board.p2_monster_1, self.board.p2_monster_2, self.board.p2_monster_3,
+                                  self.board.p2_monster_4, self.board.p2_monster_5] if isinstance(x, Monster)]
+        else:
+            opponents_monsters = [x for x in [self.board.p1_monster_1, self.board.p1_monster_2, self.board.p1_monster_3,
+                                  self.board.p1_monster_4, self.board.p1_monster_5] if isinstance(x, Monster)]
+        return opponents_monsters
+
+    def get_current_players_magic_trap(self):
+        """Returns a list of the current player's magic and trap cards on the field."""
+        if self.current_player == self.p1:
+            currents_mag_trap = [x for x in [self.board.p1_magic_1, self.board.p1_magic_2, self.board.p1_magic_3,
+                                 self.board.p1_magic_4, self.board.p1_magic_5] if isinstance(x, Magic) or
+                                 isinstance(x, Trap)]
+        else:
+            currents_mag_trap = [x for x in [self.board.p2_magic_1, self.board.p2_magic_2, self.board.p2_magic_3,
+                                 self.board.p2_magic_4, self.board.p2_magic_5] if isinstance(x, Monster) or
+                                 isinstance(x, Trap)]
+        return currents_mag_trap
+
+    def get_opponents_magic_trap(self):
+        """Returns a list of the current player's magic and trap cards on the field."""
+        if self.current_player != self.p1:
+            opponents_mag_trap = [x for x in [self.board.p1_magic_1, self.board.p1_magic_2, self.board.p1_magic_3,
+                                  self.board.p1_magic_4, self.board.p1_magic_5] if isinstance(x, Magic) or
+                                  isinstance(x, Trap)]
+        else:
+            opponents_mag_trap = [x for x in [self.board.p2_magic_1, self.board.p2_magic_2, self.board.p2_magic_3,
+                                  self.board.p2_magic_4, self.board.p2_magic_5] if isinstance(x, Monster) or
+                                  isinstance(x, Trap)]
+        return opponents_mag_trap
+
+    def choose_opponent_magic_or_trap(self):
+        """Allows user to select an opponent's magic or trap from those on the field. Returns that magic or trap."""
+        opponents_magic_or_trap = self.get_opponents_magic_trap()
+        print("These are your opponents magic/trap cards you can choose from:", opponents_magic_or_trap)
+        user_input = input(colored(f"Please choose a magic/trap [1 - {len(opponents_magic_or_trap)}].",
+                                   "green"))
+        if int(user_input) in range(1, len(opponents_magic_or_trap) + 1):
+            return opponents_magic_or_trap[int(user_input) - 1]
+        else:
+            print(colored("Invalid index, please try again!", "red"))
+
+    def get_all_monsters_on_field(self):
+        """Returns a list of all the monsters on the field, of both players."""
+        return self.get_current_players_monsters() + self.get_opposing_players_monsters()
+
+    def change_position(self, monster):
+        """Changes the position of a monster. (Not to be used when summoning monsters.)"""
+        desired_position = input(colored("What position would you like the monster in?\n"
+                                         "'a' : attack\n"
+                                         "'d' : defense\n", "green"))
+        if desired_position == "a":
+            monster.position = "ATK"
+        elif desired_position == "d":
+            monster.position = "DEF"
+        else:
+            print(colored("Invalid input. Please try again!", "red"))
+
     def main_phase(self):
         """Players are able to place cards onto the field according to the rules. Players are also able to manipulate
         their cards on the field by changing their positions or activating card effects.
@@ -147,22 +374,24 @@ class Game:
             card_to_activate.position = "FACEUP"
             # Activate card's specific effect by calling function
             card_effect_function = self.card_effects[card_to_activate.name]
-            print(card_to_activate, "effect activated!", card_effect_function.__doc__)
-            card_effect_function(self)
-            # Send card from field to the graveyard
-            self.send_magic_field_to_graveyard(card_to_activate)
+            print(card_to_activate, "effect initiated...", card_effect_function.__doc__)
+            if card_effect_function(self):
+                # Send card from field to the graveyard
+                self.send_magic_field_to_graveyard(card_to_activate)
+                # Else...message displayed will come from effect function being called
 
         def activate_magic_or_trap_from_hand(card_to_activate):
             """Activates the effect of a magic or trap card directly from the hand."""
             if isinstance(card_to_activate, Magic) or isinstance(card_to_activate, Trap):
                 # Activate card's specific effect by calling function
                 card_effect_function = self.card_effects[card_to_activate.name]
-                print(card_to_activate, "effect activated!", card_effect_function.__doc__)
-                card_effect_function(self)
-                # Move card to graveyard
-                self.get_current_player_graveyard().append(card_to_activate)
-                # Remove card from hand
-                self.current_player.hand.remove(card_to_activate)
+                print(card_to_activate, "effect initiated...", card_effect_function.__doc__)
+                if card_effect_function(self):
+                    # Move card to graveyard
+                    self.get_current_player_graveyard().append(card_to_activate)
+                    # Remove card from hand
+                    self.current_player.hand.remove(card_to_activate)
+                    print("Effect resolved successfully!")
             else:
                 print(colored("Invalid card, try again!", "red"))
 
@@ -200,8 +429,6 @@ class Game:
             # Prevent player from summoning multiple monsters in a turn
             elif self.current_player.summoned_monster_this_turn:
                 print(colored("You can't summon another monster this turn!", "red"))
-            # Remove card from hand after card is placed on field.
-            # self.current_player.hand.remove(monster)
 
         def change_monster_position():
             """Changes the position attribute of a Monster on the field. (To attack or defense.)"""
@@ -428,209 +655,6 @@ class Game:
             else:
                 print(colored("Invalid input! Please try again!", "red"))
 
-    def update_game_state(self):
-        """Checks if either player has ran out of life points or if either player is unable to draw a card. Updates the
-        game state if either condition is met.
-        """
-        if self.p1.life_points <= 0 or self.p1.player_deck.is_empty():
-            self.game_state = "Kaiba won!"
-        elif self.p2.life_points <= 0 or self.p2.player_deck.is_empty():
-            self.game_state = "Yugi won!"
-
-    def choose_current_monster(self):
-        """Allows user to select one of their monsters from those on the field. Returns that monster."""
-        currents_monsters = self.get_current_players_monsters()
-        print("These are your monsters you can choose from:", currents_monsters)
-        user_input = input(colored(f"Please choose a monster [1 - {len(currents_monsters)}].",
-                                   "green"))
-        if int(user_input) in range(1, len(currents_monsters) + 1):
-            return currents_monsters[int(user_input) - 1]
-        else:
-            print(colored("Invalid index, please try again!", "red"))
-
-    def choose_monster_from_both_graveyards(self):
-        both_graveyards = self.get_current_player_graveyard() + self.get_opposing_player_graveyard()
-        both_graveyards = [x for x in both_graveyards if isinstance(x, Monster)]
-        print("These are the monsters you can choose from either graveyard:", both_graveyards)
-        user_input = input(colored(f"Please choose a monster [1 - {len(both_graveyards)}] to revive.",
-                                   "green"))
-        if int(user_input) in range(1, len(both_graveyards) + 1):
-            return both_graveyards[int(user_input) - 1]
-        else:
-            print(colored("Invalid index, please try again!", "red"))
-
-    def choose_opponent_monster(self):
-        """Allows user to select an opponent's monster from those on the field. Returns that monster."""
-        opponents_monsters = self.get_opposing_players_monsters()
-        print("These are your opponents monsters you can choose from:", opponents_monsters)
-        user_input = input(colored(f"Please choose a monster [1 - {len(opponents_monsters)}].",
-                                   "green"))
-        if int(user_input) in range(1, len(opponents_monsters) + 1):
-            return opponents_monsters[int(user_input) - 1]
-        else:
-            print(colored("Invalid index, please try again!", "red"))
-
-    def place_in_open_monster_spot(self, monster_to_place):
-        """Finds an open monster spot on the current players side of the field. Places monster_to_place in that spot
-        on the board.
-        """
-        if self.current_player == self.p1:
-            open_spots = ["p1_monster_1", "p1_monster_2", "p1_monster_3", "p1_monster_4", "p1_monster_5"]
-        else:
-            open_spots = ["p2_monster_1", "p2_monster_2", "p2_monster_3", "p2_monster_4", "p2_monster_5"]
-
-        for item in open_spots:
-            if not isinstance(item, Monster):
-                setattr(self.board, item, monster_to_place)
-                break
-
-    def all_monsters_attacked_to_false(self):
-        """Sets all monsters on the field (attacked_this_turn) attribute to False, to allow for next turn."""
-        for i in vars(self.board):
-            # Find monster to be removed
-            if isinstance(vars(self.board)[i], Monster):
-                vars(self.board)[i].attacked_this_turn = False
-
-    def all_monster_sent_grave_to_false(self):
-        """Sets all monsters in the graveyards attribute (sent_to_grave_this_turn) to false, to allow for correct
-        gameplay moving forward.
-        """
-        for card in [self.p1.graveyard, self.p2.graveyard]:
-            if isinstance(card, Monster):
-                card.sent_to_grave_this_turn = False
-
-    def send_card_hand_to_graveyard(self, card_to_send):
-        """Sends a card from a player's hand to their graveyard. Receives a card object and returns nothing."""
-        if card_to_send in self.current_player.hand:
-            self.current_player.hand.remove(card_to_send)
-            self.current_player.graveyard.append(card_to_send)
-        elif card_to_send in self.opposing_player.hand:
-            self.opposing_player.hand.remove(card_to_send)
-            self.opposing_player.graveyard.append(card_to_send)
-        else:
-            print(colored("Card is not in either player's hand!", "red"))
-
-    def send_monster_field_to_graveyard(self, monster):
-        """Sends monster card from field to the owner's graveyard. Receives monster card object and returns nothing."""
-        for i in vars(self.board):
-            # Find monster to be removed
-            if vars(self.board)[i] == monster:
-                if monster in self.get_current_players_monsters():
-                    to_graveyard = self.current_player
-                elif monster in self.get_opposing_players_monsters():
-                    to_graveyard = self.opposing_player
-                else:
-                    print(colored("Error!", "red"))
-                    return
-                vars(self.board)[i] = self.board.empty_placeholder
-                # Set monster as sent to graveyard this turn
-                monster.sent_to_grave_this_turn = True
-                # Send monster to the correct graveyard
-                if to_graveyard == self.current_player:
-                    self.current_player.graveyard.append(monster)
-                    print(colored(f"{monster} sent to {self.current_player}'s graveyard.\n", "red"))
-                else:
-                    self.opposing_player.graveyard.append(monster)
-                    print(colored(f"{monster} sent to {self.opposing_player}'s graveyard.\n", "red"))
-
-    def send_magic_field_to_graveyard(self, magic):
-        """Sends magic card from the field to the owner's graveyard. Receives magic card object and returns nothing."""
-        for i in vars(self.board):
-            if vars(self.board)[i] == magic:
-                if magic in self.get_current_players_magic_trap():
-                    to_graveyard = self.current_player
-                elif magic in self.get_opponents_magic_trap():
-                    to_graveyard = self.opposing_player
-                else:
-                    print(colored("Error!", "red"))
-                    return
-                vars(self.board)[i] = self.board.empty_placeholder
-                if to_graveyard == self.current_player:
-                    self.current_player.graveyard.append(magic)
-                else:
-                    self.opposing_player.graveyard.append(magic)
-
-    def monster_to_blank_space(self, card):
-        """Removes Monster from the board without sending it anywhere. Replaces monster with empty placeholder. Receives
-        monster object and returns nothing.
-        """
-        monster_spots = ["p1_monster_1", "p1_monster_2", "p1_monster_3", "p1_monster_4", "p1_monster_5",
-                         "p2_monster_1", "p2_monster_2", "p2_monster_3", "p2_monster_4", "p2_monster_5"]
-
-        for i in monster_spots:
-            if getattr(self.board, i) == card:
-                setattr(self.board, i, self.board.empty_placeholder)
-                break
-
-    def get_current_player_graveyard(self):
-        """Returns the current player's graveyard as a list of Card objects."""
-        return self.current_player.graveyard
-
-    def get_opposing_player_graveyard(self):
-        """Returns the current player's graveyard as a list of Card objects."""
-        return self.opposing_player.graveyard
-
-    def get_current_players_monsters(self):
-        """Returns a list of the current players monsters on the field."""
-        if self.current_player == self.p1:
-            currents_monsters = [x for x in [self.board.p1_monster_1, self.board.p1_monster_2, self.board.p1_monster_3,
-                                 self.board.p1_monster_4, self.board.p1_monster_5] if isinstance(x, Monster)]
-        else:
-            currents_monsters = [x for x in [self.board.p2_monster_1, self.board.p2_monster_2, self.board.p2_monster_3,
-                                 self.board.p2_monster_4, self.board.p2_monster_5] if isinstance(x, Monster)]
-        return currents_monsters
-
-    def get_opposing_players_monsters(self):
-        """Returns a list of the opposing player's monsters on the field."""
-        if self.current_player == self.p1:
-            opponents_monsters = [x for x in [self.board.p2_monster_1, self.board.p2_monster_2, self.board.p2_monster_3,
-                                  self.board.p2_monster_4, self.board.p2_monster_5] if isinstance(x, Monster)]
-        else:
-            opponents_monsters = [x for x in [self.board.p1_monster_1, self.board.p1_monster_2, self.board.p1_monster_3,
-                                  self.board.p1_monster_4, self.board.p1_monster_5] if isinstance(x, Monster)]
-        return opponents_monsters
-
-    def get_current_players_magic_trap(self):
-        """Returns a list of the current player's magic and trap cards on the field."""
-        if self.current_player == self.p1:
-            currents_mag_trap = [x for x in [self.board.p1_magic_1, self.board.p1_magic_2, self.board.p1_magic_3,
-                                 self.board.p1_magic_4, self.board.p1_magic_5] if isinstance(x, Magic) or
-                                 isinstance(x, Trap)]
-        else:
-            currents_mag_trap = [x for x in [self.board.p2_magic_1, self.board.p2_magic_2, self.board.p2_magic_3,
-                                 self.board.p2_magic_4, self.board.p2_magic_5] if isinstance(x, Monster) or
-                                 isinstance(x, Trap)]
-        return currents_mag_trap
-
-    def get_opponents_magic_trap(self):
-        """Returns a list of the current player's magic and trap cards on the field."""
-        if self.current_player != self.p1:
-            opponents_mag_trap = [x for x in [self.board.p1_magic_1, self.board.p1_magic_2, self.board.p1_magic_3,
-                                  self.board.p1_magic_4, self.board.p1_magic_5] if isinstance(x, Magic) or
-                                  isinstance(x, Trap)]
-        else:
-            opponents_mag_trap = [x for x in [self.board.p2_magic_1, self.board.p2_magic_2, self.board.p2_magic_3,
-                                  self.board.p2_magic_4, self.board.p2_magic_5] if isinstance(x, Monster) or
-                                  isinstance(x, Trap)]
-        return opponents_mag_trap
-
-
-    def get_all_monsters_on_field(self):
-        """Returns a list of all the monsters on the field, of both players."""
-        return self.get_current_players_monsters() + self.get_opposing_players_monsters()
-
-    def change_position(self, monster):
-        """Changes the position of a monster. (Not to be used when summoning monsters.)"""
-        desired_position = input(colored("What position would you like the monster in?\n"
-                                         "'a' : attack\n"
-                                         "'d' : defense\n", "green"))
-        if desired_position == "a":
-            monster.position = "ATK"
-        elif desired_position == "d":
-            monster.position = "DEF"
-        else:
-            print(colored("Invalid input. Please try again!", "red"))
-
     def next_turn(self):
         """Prepare for next player's turn, changing current player, opposing player, incrementing turn count, resetting
         player's ability to summon a monster for their next turn, setting all monsters attacked_this_turn and
@@ -638,6 +662,7 @@ class Game:
         """
         self.turn_count += 1
         self.current_player.summoned_monster_this_turn = False
+        self.current_player.monster_sent_to_gy_this_turn = False
         self.all_monsters_attacked_to_false()
         self.all_monster_sent_grave_to_false()
         if self.current_player == self.p1:
@@ -700,3 +725,4 @@ class Game:
 if __name__ == "__main__":
     game = Game()
     game.play_game()
+

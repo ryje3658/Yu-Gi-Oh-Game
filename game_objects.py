@@ -221,6 +221,7 @@ class Player:
         self.hand = []
         self.graveyard = []
         self.summoned_monster_this_turn = False
+        self.monster_sent_to_gy_this_turn = False
         self.damage_taken_this_turn = 0
 
     def shuffle_and_start_hand(self):
