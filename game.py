@@ -89,11 +89,6 @@ class Game:
         their cards on the field by changing their positions or activating card effects.
         """
 
-        if self.current_player == self.p1:
-            abbrev = "p1"
-        else:
-            abbrev = "p2"
-
         def main_phase_user_input():
             """Prompts user to enter input based on potential actions they can take. Returns that input."""
             print("\n")
@@ -108,40 +103,24 @@ class Game:
             action_input = input()
             return action_input
 
-        def check_for_monster(player_abbrev, card_type, slot_num):
-            """Checks if a space is occupied by a monster. Returns that Monster object if so."""
-            slot = player_abbrev + f"_{card_type}_" + slot_num
-            if isinstance(getattr(self.board, slot), Monster):
-                return getattr(self.board, slot)
-            else:
-                return False
-
-        def check_for_set_magic_or_trap(player_abbrev, card_type, slot_num):
-            """Checks if the player has a set magic or trap card in the specified location, returns it if so."""
-            slot = player_abbrev + f"_{card_type}_" + slot_num
-            if isinstance(getattr(self.board, slot), Magic or Trap):
-                return getattr(self.board, slot)
-            else:
-                return False
-
         def set_magic_or_trap(mag_trap):
             """Sets magic/trap card on the field and then removes the card from the player's hand."""
             # Place magic or trap card on board in an open slot
             self.place_in_open_magic_trap_spot(mag_trap)
+            # Update position to SET
+            mag_trap.position = "SET"
             # Remove card from hand after card is placed on field.
             self.current_player.hand.remove(mag_trap)
 
         def activate_magic_or_trap():
             """Activates the effect of a magic or trap card on the field."""
-            slot_number = input(colored(f"Which magic or trap card on the field would you like to activate? [1-5]",
-                                        "green"))
-            card_to_activate = check_for_set_magic_or_trap(abbrev, "magic", slot_number)
-            if not card_to_activate:
-                print(colored("Invalid location, try again!", "red"))
-            # Activate card's specific effect by calling function
+            # Player selects card to activate from their magic/trap cards on the field
+            card_to_activate = self.choose_current_magic_or_trap()
             card_effect_function = self.card_effects[card_to_activate.name]
             print(card_to_activate, "effect initiated...", card_effect_function.__doc__)
             if card_effect_function(self):
+                # Set card position to ACTIVATED
+                card_to_activate.position = "ACTIVATED"
                 # Send card from field to the graveyard
                 self.send_magic_field_to_graveyard(card_to_activate)
                 # Else...message displayed will come from effect function being called
@@ -153,6 +132,8 @@ class Game:
                 card_effect_function = self.card_effects[card_to_activate.name]
                 print(card_to_activate, "effect initiated...", card_effect_function.__doc__)
                 if card_effect_function(self):
+                    # Set card position to ACTIVATED
+                    card_to_activate.position = "ACTIVATED"
                     # Move card to graveyard
                     self.get_current_player_graveyard().append(card_to_activate)
                     # Remove card from hand
@@ -165,43 +146,70 @@ class Game:
             """Summons a monster from player's hand to the field. Receives a monster object and returns nothing."""
             if self.current_player.summoned_monster_this_turn is False:
                 self.place_in_open_monster_spot(monster)
-                self.change_position(monster)
+                self.summon_position(monster)
                 self.current_player.summoned_monster_this_turn = True
+                monster.position_changed_this_turn = True
                 self.current_player.hand.remove(monster)
             else:
                 print(colored("You can't summon another monster this turn!", "red"))
 
         def change_monster_position():
             """Changes the position attribute of a Monster on the field. (To attack or defense.)"""
-            monster_slot_num = input("Please enter 1-5 to choose the monster you'd like to alter.")
-            monster_on_field = check_for_monster(abbrev, "monster", monster_slot_num)
+            monster_on_field = self.choose_current_monster()
             if monster_on_field is not False:
-                self.change_position(monster_on_field)
+                if monster_on_field.position_changed_this_turn:
+                    print(colored("This monster has already changed positions this turn!", "red"))
+                    return
+                else:
+                    monster_on_field.position_changed_this_turn = True
+                    # If monster is face down and has a flip effect, activate flip effect after changing position
+                    if monster_on_field.position == "FD" and monster_on_field.effect == "Flip":
+                        self.change_position(monster_on_field)
+                        self.activate_flip_effect(monster_on_field)
+                    # All other cases- just change the monster's position
+                    else:
+                        self.change_position(monster_on_field)
 
         def change_card_on_field():
             """Prompts user to specify what kind of action they want to take on a card on the field."""
-            magic_or_monster = input(colored("Type 'm' to select a monster card or 's' to select a magic or trap card."
-                                             , "green"))
-            # Change the position of a monster on the field.
-            if magic_or_monster == 'm':
-                change_monster_position()
-            # Activate a magic or trap card on the field.
-            elif magic_or_monster == 's':
-                activate_magic_or_trap()
-            else:
-                print(colored("Invalid input. Please try again!", "red"))
+            while True:
+                print(colored("Type 'm': to select a monster card on the field.", "green"))
+                print(colored("Type 's': to select a magic or trap card on the field.", "green"))
+                print(colored("Type 'x': to go back and choose a different action.", "red"))
+                magic_or_monster = input()
+                # Change the position of a monster on the field.
+                if magic_or_monster == 'm':
+                    change_monster_position()
+                    return
+                # Activate a magic or trap card on the field.
+                elif magic_or_monster == 's':
+                    activate_magic_or_trap()
+                    return
+                # Cancel action
+                elif magic_or_monster == 'x':
+                    return
+                else:
+                    print(colored("Invalid input. Please try again!", "red"))
 
         def set_or_activate_from_hand(magic_or_trap):
-            set_or_activate = input(colored("Type s if you would like to set the magic/trap card or a if you "
-                                            "would like to activate the card now.", "green"))
-            # Set a magic or trap card on the field.
-            if set_or_activate == "s":
-                set_magic_or_trap(magic_or_trap)
-            # Activate a magic or trap card from the hand.
-            elif set_or_activate == "a":
-                activate_magic_or_trap_from_hand(magic_or_trap)
-            else:
-                print(colored("Invalid input...please try again!", "red"))
+            while True:
+                print(colored("Type 's': to set the magic/trap card.", "green"))
+                print(colored("Type 'a': to activate the card now.", "green"))
+                print(colored("Type 'x': to go back and choose a different action.", "red"))
+                set_or_activate = input()
+                # Set a magic or trap card on the field.
+                if set_or_activate == "s":
+                    set_magic_or_trap(magic_or_trap)
+                    return
+                # Activate a magic or trap card from the hand.
+                elif set_or_activate == "a":
+                    activate_magic_or_trap_from_hand(magic_or_trap)
+                    return
+                # Cancel action
+                elif set_or_activate == 'x':
+                    return
+                else:
+                    print(colored("Invalid input...please try again!", "red"))
 
         def play_card_from_hand(hand_input):
             """Player chose to play a card from their hand. Prompts for input of which card and what they would like
@@ -348,6 +356,10 @@ class Game:
                 # Attack <= defense -- attacking player takes damage equal to difference, both monsters remain on field
                 else:
                     damage_to_current_player += (tgt_monster.defense - atk_monster.attack)
+                # Target monster is face down and has a flip effect
+                if tgt_monster.position == "FD" and tgt_monster.effect == "Flip":
+                    tgt_monster.position = "DEF"
+                    self.activate_flip_effect(tgt_monster)
             # Attacking attack position monster
             elif tgt_monster.position == "ATK":
                 # Attack > attack of target monster, calculate damage and remove target monster from field
@@ -413,6 +425,7 @@ class Game:
             return currents_monsters[int(user_input) - 1]
         else:
             print(colored("Invalid index, please try again!", "red"))
+            return False
 
     def choose_opponent_monster(self):
         """Allows user to select an opponent's monster from those on the field. Returns that monster."""
@@ -422,6 +435,28 @@ class Game:
                                    "green"))
         if int(user_input) in range(1, len(opponents_monsters) + 1):
             return opponents_monsters[int(user_input) - 1]
+        else:
+            print(colored("Invalid index, please try again!", "red"))
+
+    def choose_from_all_monsters_on_field(self):
+        """Allows user to select a monster from either side of the field. Returns that monster."""
+        all_monsters_on_field = self.get_all_monsters_on_field()
+        print("These are all of the monsters on the field:",  all_monsters_on_field)
+        user_input = input(colored(f"Please choose a monster [1 - {len(all_monsters_on_field)}].",
+                                   "green"))
+        if int(user_input) in range(1, len(all_monsters_on_field) + 1):
+            return all_monsters_on_field[int(user_input) - 1]
+        else:
+            print(colored("Invalid index, please try again!", "red"))
+
+    def choose_from_all_magic_trap_on_field(self):
+        """Allows user to select a magic or trap card from either side of the field. Returns that magic or trap card."""
+        all_magic_trap_on_field = self.get_all_magic_trap()
+        print("These are all of the magic and trap cards on the field:", all_magic_trap_on_field)
+        user_input = input(colored(f"Please choose a card [1 - {len(all_magic_trap_on_field)}].",
+                                   "green"))
+        if int(user_input) in range(1, len(all_magic_trap_on_field) + 1):
+            return all_magic_trap_on_field[int(user_input) - 1]
         else:
             print(colored("Invalid index, please try again!", "red"))
 
@@ -494,6 +529,13 @@ class Game:
             if isinstance(card, Monster):
                 card.sent_to_grave_this_turn = False
 
+    def all_monsters_changed_pos_to_false(self):
+        """Sets all monsters change_position_this_turn attribute to False, to allow for correct gameplay in the
+        following turns.
+        """
+        for monster in self.get_all_monsters_on_field():
+            monster.position_changed_this_turn = False
+
     def send_card_hand_to_graveyard(self, card_to_send):
         """Sends a card from a player's hand to their graveyard. Receives a card object and returns nothing."""
         if card_to_send in self.current_player.hand:
@@ -504,6 +546,16 @@ class Game:
             self.opposing_player.graveyard.append(card_to_send)
         else:
             print(colored("Card is not in either player's hand!", "red"))
+
+    def send_monster_field_to_hand(self):
+        """Sends Monster from the field to the respective player's hand. Receives Monster object and returns nothing."""
+        monster_to_send = self.choose_from_all_monsters_on_field()
+        if monster_to_send in self.get_current_players_monsters():
+            self.current_player.hand.append(monster_to_send)
+        else:
+            self.opposing_player.hand.append(monster_to_send)
+        self.monster_to_blank_space(monster_to_send)
+        print(f"{monster_to_send} send back to the owner's hand!")
 
     def send_monster_field_to_graveyard(self, monster):
         """Sends monster card from field to the owner's graveyard. Receives monster card object and returns nothing."""
@@ -594,7 +646,7 @@ class Game:
                                  isinstance(x, Trap)]
         else:
             currents_mag_trap = [x for x in [self.board.p2_magic_1, self.board.p2_magic_2, self.board.p2_magic_3,
-                                 self.board.p2_magic_4, self.board.p2_magic_5] if isinstance(x, Monster) or
+                                 self.board.p2_magic_4, self.board.p2_magic_5] if isinstance(x, Magic) or
                                  isinstance(x, Trap)]
         return currents_mag_trap
 
@@ -606,9 +658,24 @@ class Game:
                                   isinstance(x, Trap)]
         else:
             opponents_mag_trap = [x for x in [self.board.p2_magic_1, self.board.p2_magic_2, self.board.p2_magic_3,
-                                  self.board.p2_magic_4, self.board.p2_magic_5] if isinstance(x, Monster) or
+                                  self.board.p2_magic_4, self.board.p2_magic_5] if isinstance(x, Magic) or
                                   isinstance(x, Trap)]
         return opponents_mag_trap
+
+    def get_all_magic_trap(self):
+        """Returns a list of all the magic and trap cards on the field."""
+        return self.get_opponents_magic_trap() + self.get_current_players_magic_trap()
+
+    def choose_current_magic_or_trap(self):
+        """Allows user to select a magic or trap from theirs on the field. Returns that magic or trap."""
+        current_magic_or_trap = self.get_current_players_magic_trap()
+        print("These are your magic/trap cards you can choose from:", current_magic_or_trap)
+        user_input = input(colored(f"Please choose a magic/trap [1 - {len(current_magic_or_trap)}].",
+                                   "green"))
+        if int(user_input) in range(1, len(current_magic_or_trap) + 1):
+            return current_magic_or_trap[int(user_input) - 1]
+        else:
+            print(colored("Invalid index, please try again!", "red"))
 
     def choose_opponent_magic_or_trap(self):
         """Allows user to select an opponent's magic or trap from those on the field. Returns that magic or trap."""
@@ -626,7 +693,9 @@ class Game:
         return self.get_current_players_monsters() + self.get_opposing_players_monsters()
 
     def change_position(self, monster):
-        """Changes the position of a monster. (Not to be used when summoning monsters.)"""
+        """Changes the position of a monster. (Not to be used when summoning monsters.) Receives a monster object and
+        returns nothing.
+        """
         desired_position = input(colored("What position would you like the monster in?\n"
                                          "'a' : attack\n"
                                          "'d' : defense\n", "green"))
@@ -636,6 +705,30 @@ class Game:
             monster.position = "DEF"
         else:
             print(colored("Invalid input. Please try again!", "red"))
+
+    def summon_position(self, monster):
+        """Sets the position of a monster being summoned according to user input, includes to option to set face down,
+        which is not allowed in any other case. Receives monster object. Returns nothing.
+        """
+        desired_position = input(colored("What position would you like the monster in?\n"
+                                         "'a' : attack\n"
+                                         "'d' : defense\n"
+                                         "'f' : face down defense\n", "green"))
+        if desired_position == "a":
+            monster.position = "ATK"
+        elif desired_position == "d":
+            monster.position = "DEF"
+        elif desired_position == "f":
+            monster.position = "FD"
+        else:
+            print(colored("Invalid input. Please try again!", "red"))
+
+    def activate_flip_effect(self, flip_monster):
+        """Activates the effect of a flip effect monster. Receives a flip effect monster and returns nothing."""
+        card_effect_function = self.card_effects[flip_monster.name]
+        # Display message to user that a flip effect has been activated, then call the corresponding flip effect
+        print(f"{flip_monster} revealed as face down monster! Effect initiated! {card_effect_function.__doc__}")
+        card_effect_function(self)
 
     def next_turn(self):
         """Prepare for next player's turn, changing current player, opposing player, incrementing turn count, resetting
@@ -647,6 +740,7 @@ class Game:
         self.current_player.monster_sent_to_gy_this_turn = False
         self.all_monsters_attacked_to_false()
         self.all_monster_sent_grave_to_false()
+        self.all_monsters_changed_pos_to_false()
         if self.current_player == self.p1:
             self.current_player = self.p2
             self.opposing_player = self.p1

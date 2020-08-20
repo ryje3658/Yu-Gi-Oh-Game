@@ -79,9 +79,9 @@ def oozaki_eff(game):
 
 def fissure_eff(game):
     """Destroys opponent's monster with the lowest attack power."""
-    opponents_monsters = game.get_opposing_players_monsters()
-    if len(opponents_monsters) > 0:
-        weakest_monster = min(opponents_monsters, key=lambda x: x.attack)
+    opponents_face_up_monsters = [x for x in game.get_opposing_players_monsters() if x.position != "FD"]
+    if len(opponents_face_up_monsters) > 0:
+        weakest_monster = min(opponents_face_up_monsters, key=lambda x: x.attack)
         game.send_monster_field_to_graveyard(weakest_monster)
         return True
     else:
@@ -453,19 +453,118 @@ def mysterious_puppeteer_eff(game):
 
 
 def trap_master_eff(game):
-    pass
+    """Select one spell or trap card on the field and destroy it."""
+    if len(game.get_all_magic_trap()) > 0:
+        print("The owner of Trap Master can choose one magic or trap card on the field and destroy it!")
+        while True:
+            print(colored("Type 'f': if there is magic or trap you'd like to destroy.", "green"))
+            print(colored("Type 'x': if there is no magic or trap you'd like to destroy.", "red"))
+            user_input = input()
+            if user_input == 'f':
+                card_to_send = game.choose_from_all_magic_trap_on_field()
+                game.send_magic_field_to_graveyard(card_to_send)
+                return
+            elif user_input == 'x':
+                return
+            else:
+                print(colored("Invalid input, please choose a valid option!", "red"))
+    else:
+        print(colored("No spell or trap cards on the field to destroy. Effect not resolved!", "red"))
 
 
 def hane_hane_eff(game):
-    pass
+    """Select one monster on the field, and return it to the owner's hand."""
+    # Hane-Hane still on the field/not destroyed by battle
+    if len([x for x in game.get_all_monsters_on_field() if x.name == "Hane-Hane"]) == 1:
+        if len(game.get_all_monsters_on_field()) > 1:
+            print("The owner of Hane-Hane can choose one monster on the field to send to the owner's hand!")
+            while True:
+                print(colored("Type 'f': if there is monster you'd like to send to the owner's hand.", "green"))
+                print(colored("Type 'x': if there is no monster you'd like send to the owner's hand.", "red"))
+                user_input = input()
+                if user_input == 'f':
+                    game.send_monster_field_to_hand()
+                    return
+                elif user_input == 'x':
+                    return
+                else:
+                    print(colored("Invalid input, please choose a valid option!", "red"))
+        # No other monsters on the field besides Hane-Hane, no targets
+        else:
+            print(colored("There are no possible targets. Effect could not be resolved.", "red"))
+            return
+    # Hane-Hane no longer on the field
+    else:
+        if len(game.get_all_monsters_on_field()) > 0:
+            print(colored("The owner of Hane-Hane can choose one monster on the field to send to the owner's hand!"
+                          , "green"))
+            while True:
+                print(colored("Type 'f': if there is monster you'd like to send to the owner's hand.", "green"))
+                print(colored("Type 'x': if there is no monster you'd like to send to the owner's hand.", "red"))
+                user_input = input()
+                if user_input == 'f':
+                    game.send_monster_field_to_hand()
+                    return
+                elif user_input == 'x':
+                    return
+                else:
+                    print(colored("Invalid input, please choose a valid option!", "red"))
+        # No other monsters on the field besides Hane-Hane, no targets
+        else:
+            print(colored("There are no possible targets. Effect could not be resolved.", "red"))
+            return
 
 
 def man_eater_bug_eff(game):
-    pass
+    """Destroy one monster on the field, regardless of position."""
+    # Man-Eater bug still on the field/not destroyed by battle
+    if len([x for x in game.get_all_monsters_on_field() if x.name == "Man-Eater Bug"]) == 1:
+        if len(game.get_all_monsters_on_field()) > 1:
+            print("The owner of Man-Eater Bug can choose one monster on the field to destroy!")
+            while True:
+                print(colored("Type 'f': if there is monster you'd like to destroy.", "green"))
+                print(colored("Type 'x': if there is no monster you'd like to destroy.", "red"))
+                user_input = input()
+                if user_input == 'f':
+                    monster_to_destroy = game.choose_from_all_monsters_on_field()
+                    game.send_monster_field_to_graveyard(monster_to_destroy)
+                    return
+                elif user_input == 'x':
+                    return
+                else:
+                    print(colored("Invalid input, please choose a valid option!", "red"))
+        # No other monsters on the field besides Man-eater bug, no targets
+        else:
+            print(colored("There are no possible targets. Effect could not be resolved.", "red"))
+            return
+    # Man-Eater bug no longer on the field
+    else:
+        if len(game.get_all_monsters_on_field()) > 0:
+            print(colored("The owner of Man-Eater Bug can choose one monster on the field to destroy!", "green"))
+            while True:
+                print(colored("Type 'f': if there is monster you'd like to destroy.", "green"))
+                print(colored("Type 'x': if there is no monster you'd like to destroy.", "red"))
+                user_input = input()
+                if user_input == 'f':
+                    monster_to_destroy = game.choose_from_all_monsters_on_field()
+                    game.send_monster_field_to_graveyard(monster_to_destroy)
+                    return
+                elif user_input == 'x':
+                    return
+                else:
+                    print(colored("Invalid input, please choose a valid option!", "red"))
+        # No other monsters on the field besides Man-eater bug, no targets
+        else:
+            print(colored("There are no possible targets. Effect could not be resolved.", "red"))
+            return
 
 
 def the_stern_mystic_eff(game):
-    pass
+    """Reveal all face-down cards on the field, then return them to their original positions."""
+    set_magic_trap = [x for x in game.get_all_magic_trap() if x.position == "SET"]
+    face_down_monsters = [x for x in game.get_all_monsters_on_field() if x.position == "FD"]
+    all_face_downs = set_magic_trap + face_down_monsters
+    print("These are all of the face down cards on the field:", all_face_downs)
 
 
 def wall_of_illusion_eff(game):
@@ -502,8 +601,8 @@ pale_beast = Monster("Pale Beast", "Pale Beast", None, 1500, 1200, 4, "Beast", "
 skull_red_bird = Monster("Skull Red Bird", "Skull Bird", None, 1550, 1200, 4, "Winged Beast", "Wind")
 lord_of_d = Monster("Lord of D.", "Lord of D.", True, 1200, 1100, 4, "Spellcaster", "Dark")
 myst_pup = Monster("Mysterious Puppeteer", "mPuppeteer", True, 1000, 1500, 4, "Warrior", "Earth")
-trap_master = Monster("Trap Master", "TrapMaster", True, 500, 1100, 3, "Warrior", "Earth")
-hane_hane = Monster("Hane-Hane", "Hane-Hane ", True, 450, 500, 2, "Beast", "Earth")
+trap_master = Monster("Trap Master", "TrapMaster", "Flip", 500, 1100, 3, "Warrior", "Earth")
+hane_hane = Monster("Hane-Hane", "Hane-Hane ", "Flip", 450, 500, 2, "Beast", "Earth")
 
 # Kaiba Starter Deck Magic Cards
 monster_reborn = Magic("Monster Reborn", "M. Reborn ", True)
@@ -554,14 +653,14 @@ claw_reacher = Monster("Claw Reacher", "Claw Reach", None, 1000, 800, 3, "Fiend"
 mystic_clown_2 = Monster("Mystic Clown", "Myst Clown", None, 1500, 1000, 4, "Fiend", "Dark")
 ancient_elf = Monster("Ancient Elf", "AncientElf", None, 1450, 1200, 4, "Spellcaster", "Light")
 magical_ghost = Monster("Magical Ghost", "MagicGhost", None, 1300, 1400, 4, "Zombie", "Dark")
-stern_mystic = Monster("The Stern Mystic", "St. Mystic", True, 1500, 1200, 4, "Spellcaster", "Light")
+stern_mystic = Monster("The Stern Mystic", "St. Mystic", "Flip", 1500, 1200, 4, "Spellcaster", "Light")
 wall_of_illusion = Monster("Wall of Illusion", "W. Illusion", True, 1000, 1850, 4, "Fiend", "Dark")
 neo = Monster("Neo the Magic Swordsman", "Neo Sword ", None, 1700, 1000, 4, "Spellcaster", "Light")
 baron = Monster("Baron of the Fiend Sword", "BaronFiend", None, 1550, 800, 4, "Fiend", "Dark")
 man_eating = Monster("Man-Eating Treasure Chest", "Man-Eating", None, 1600, 1000, 4, "Fiend", "Dark")
 sorcerer = Monster("Sorcerer of the Doomed", " Sorcerer ", None, 1450, 1200, 4, "Spellcaster", "Dark")
-trap_master2 = Monster("Trap Master", "TrapMaster", True, 500, 1100, 3, "Warrior", "Earth")
-man_eater = Monster("Man-Eater Bug", "Man-Eater B", True, 450, 600, 2, "Insect", "Earth")
+trap_master2 = Monster("Trap Master", "TrapMaster", "Flip", 500, 1100, 3, "Warrior", "Earth")
+man_eater = Monster("Man-Eater Bug", "Man-Eater B", "Flip", 450, 600, 2, "Insect", "Earth")
 
 # Yugi Starter Deck Magic Cards
 monster_reborn2 = Magic("Monster Reborn", "M. Reborn ", True)
