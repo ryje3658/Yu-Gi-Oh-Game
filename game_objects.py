@@ -169,7 +169,7 @@ class Board:
         self.p1_magic_3 = self.empty_placeholder
         self.p1_magic_4 = self.empty_placeholder
         self.p1_magic_5 = self.empty_placeholder
-        self.p1_graveyard_display = "Graveyard     "
+        self.p1_graveyard_display = "---Graveyard--"
         self.p2_monster_1 = self.empty_placeholder
         self.p2_monster_2 = self.empty_placeholder
         self.p2_monster_3 = self.empty_placeholder
@@ -180,7 +180,7 @@ class Board:
         self.p2_magic_3 = self.empty_placeholder
         self.p2_magic_4 = self.empty_placeholder
         self.p2_magic_5 = self.empty_placeholder
-        self.p2_graveyard_display = "Graveyard     "
+        self.p2_graveyard_display = "---Graveyard--"
         self.p1_slots = [self.p1_monster_1, self.p1_monster_2, self.p1_monster_3, self.p1_monster_4, self.p1_monster_5,
                          self.p1_magic_1, self.p1_magic_2, self.p1_magic_3, self.p1_magic_4, self.p1_magic_5]
         self.p2_slots = [self.p2_monster_1, self.p2_monster_2, self.p2_monster_3, self.p2_monster_4, self.p2_monster_5,
@@ -194,17 +194,17 @@ class Board:
     def display_board(self):
         """Prints terminal representation of the game board."""
 
-        print("                               -----Kaiba-----\n")
+        print(colored("                                         -----Kaiba-----\n", attrs=['bold']))
         print([self.p2_graveyard_display, self.p2_magic_1, self.p2_magic_2, self.p2_magic_3, self.p2_magic_4,
                self.p2_magic_5])
         print([self.empty_placeholder, self.p2_monster_1, self.p2_monster_2, self.p2_monster_3,
                self.p2_monster_4, self.p2_monster_5])
         print("\n\n")
-        print([self.field_zone, self.p1_monster_1, self.p1_monster_2, self.p1_monster_3, self.p1_monster_4,
+        print([self.empty_placeholder, self.p1_monster_1, self.p1_monster_2, self.p1_monster_3, self.p1_monster_4,
               self.p1_monster_5])
         print([self.p1_graveyard_display, self.p1_magic_1, self.p1_magic_2, self.p1_magic_3, self.p1_magic_4,
                self.p1_magic_5])
-        print("\n                                -----Yugi-----\n")
+        print(colored("\n                                          -----Yugi-----\n", attrs=['bold']))
 
 
 class Player:
