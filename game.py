@@ -25,24 +25,22 @@ class Game:
         self.opposing_player = (self.p1 if self.current_player == self.p2 else self.p2)
         self.board = Board()
         self.turn_count = 0
-        self.card_effects = {"The Wicked Worm Beast": the_wicked_worm_beast_eff, "Lord of D.": lord_of_d_eff,
-                             "Mysterious Puppeteer": mysterious_puppeteer_eff, "Hane-Hane": hane_hane_eff, "Sogen":
-                                 sogen_eff, "Flute of Summoning Dragon":
-                                 flute_of_summoning_dragon_eff, "Ancient Telescope": ancient_telescope_eff,
+        self.card_effects = {"Hane-Hane": hane_hane_eff, "Sogen": sogen_eff, "Flute of Summoning Dragon":
+                             flute_of_summoning_dragon_eff, "Ancient Telescope": ancient_telescope_eff,
                              "Inexperienced Spy": inexperienced_spy_eff, "De-Spell": de_spell_eff, "Fissure":
                                  fissure_eff, "Oozaki": oozaki_eff, "Dark Hole": dark_hole_eff, "Invigoration":
                                  invigoration_eff, "Dark Energy": dark_energy_eff, "Ultimate Offering":
-                                 ultimate_offering_eff, "Castle Walls": castle_walls_eff, "Reverse Trap":
-                                 reverse_trap_eff, "Just Desserts": just_desserts_eff, "The Stern Mystic":
-                                 the_stern_mystic_eff, "Wall of Illusion": wall_of_illusion_eff, "Trap Master":
-                                 trap_master_eff, "Man-Eater Bug": man_eater_bug_eff, "Monster Reborn":
+                                 ultimate_offering_eff, "Castle Walls": castle_walls_eff, "Pot of Greed":
+                                 pot_of_greed_eff, "Just Desserts": just_desserts_eff, "The Stern Mystic":
+                                 the_stern_mystic_eff, "Trap Master": trap_master_eff, "Waboku": waboku_eff,
+                                 "Man-Eater Bug": man_eater_bug_eff, "Monster Reborn":
                                  monster_reborn_eff, "Remove Trap": remove_trap_eff, "Sword of Dark Destruction":
                                  sword_of_dark_destruction_eff, "Book of Secret Arts": book_of_secret_arts_eff,
-                             "Dian Keto the Cure Master": dian_keto_the_cure_master_eff, "Change of Heart":
-                                 change_of_heart_eff, "Last Will": last_will_eff, "Soul Exchange": soul_exchange_eff,
-                             "Card Destruction": card_destruction_eff, "Yami": yami_eff, "Reinforcements":
-                                 reinforcements_eff, "Two-Pronged Attack": two_pronged_attack_eff, "Trap Hole":
-                                 trap_hole_eff, "Dragon Capture Jar": dragon_capture_jar_eff, "Waboku": waboku_eff}
+                                 "Dian Keto the Cure Master": dian_keto_the_cure_master_eff, "Change of Heart":
+                                 change_of_heart_eff, "Last Will": last_will_eff, "Tribute to the Doomed":
+                                 tribute_to_the_doomed_eff, "Card Destruction": card_destruction_eff, "Yami": yami_eff,
+                                 "Reinforcements": reinforcements_eff, "Two-Pronged Attack": two_pronged_attack_eff,
+                                 "Trap Hole": trap_hole_eff, "Dragon Capture Jar": dragon_capture_jar_eff}
 
     def start_game(self):
         """Shuffles both player decks, deals hands, and provides a welcome message explaining the basic gameplay."""
@@ -67,7 +65,7 @@ class Game:
         """
         if self.turn_count != 0:
             print(colored(f"{self.phase} -- Drawing a card...", "magenta", attrs=['bold']))
-            time.sleep(1.25)
+            time.sleep(1)
             self.current_player.hand.append(self.current_player.player_deck.pop())
 
     def end_phase(self):
@@ -213,31 +211,27 @@ class Game:
 
         def play_card_from_hand(hand_input):
             """Player chose to play a card from their hand. Prompts for input of which card and what they would like
-            to do. Receives an index related to card in player hand. Calls functions related to specific card played.
+            to play. Different from choose card from hand function as this function uses the display of hand already
+            there versus printing out the hand again to the user and receives a hand_input already declaring the card
+            they are interested in playing. Returns nothing.
             """
+            currents_cards = self.current_player.hand
             try:
-                card_to_play = self.current_player.hand[int(hand_input) - 1]
-            except IndexError:
-                print(colored("Please provide a valid index for a card in your hand.", "red"))
-            else:
+                while True:
+                    if int(hand_input) in range(1, len(currents_cards) + 1):
+                        card_to_play = currents_cards[int(hand_input) - 1]
+                        break
+                    else:
+                        print(colored("Invalid index, please try again!", "red"))
+                        return
                 # Player chose to play a Monster card
                 if isinstance(card_to_play, Monster):
                     summon_monster(card_to_play)
                 # Player chose to play a Trap or Magic Card
                 else:
                     set_or_activate_from_hand(card_to_play)
-
-        def check_valid_hand_and_play(user_input_hand):
-            """Checks if user input a value index to play a card from their hand, then plays that card or informs the
-            user they've provided invalid input.
-            """
-            try:
-                if 1 <= int(user_input_hand) <= len(self.current_player.hand):
-                    play_card_from_hand(int(user_input_hand))
-                else:
-                    print(colored("Invalid index. Please enter a valid index!", "red"))
             except ValueError:
-                print(colored("Invalid input. Please try again!", "red"))
+                print(colored("Invalid input! Please try again!", "red"))
 
         # -- Main Phase -- Main Loop Logic --
         while True:
@@ -250,7 +244,7 @@ class Game:
                 change_card_on_field()
             # Play card from hand/catch invalid input
             else:
-                check_valid_hand_and_play(user_input)
+                play_card_from_hand(user_input)
 
     def battle_phase(self):
         """Players are able to use monsters they control to declare attacks on their opponents monsters, or in the case
@@ -479,6 +473,17 @@ class Game:
                                    "green"))
         if int(user_input) in range(1, len(currents_monsters) + 1):
             return currents_monsters[int(user_input) - 1]
+        else:
+            print(colored("Invalid index, please try again!", "red"))
+
+    def choose_card_from_hand(self):
+        """Selects a card from the current player's hand. Receives nothing. Returns a card object."""
+        currents_cards = self.current_player.hand
+        print("These are the cards in your hand you can choose from:", currents_cards)
+        user_input = input(colored(f"Please choose a card [1 - {len(currents_cards)}].",
+                                   "green"))
+        if int(user_input) in range(1, len(currents_cards) + 1):
+            return currents_cards[int(user_input) - 1]
         else:
             print(colored("Invalid index, please try again!", "red"))
 

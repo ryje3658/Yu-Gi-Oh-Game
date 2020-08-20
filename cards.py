@@ -428,28 +428,37 @@ def waboku_eff(game):
     for card in game.get_current_player_graveyard():
         if isinstance(card, Monster):
             if card.sent_to_grave_this_turn:
-                # Special summon monsters
+                # Summon monster
                 return True
 
 
-def reverse_trap_eff(game):
-    pass
+def pot_of_greed_eff(game):
+    """Draw 2 cards."""
+    if game.current_player.player_deck.get_length() < 3:
+        print(colored("Can't draw 2 cards. You will lose the duel if you do!", "red"))
+        return False
+    for i in range(2):
+        game.current_player.hand.append(game.current_player.player_deck.pop())
+    print(f"{game.current_player} drew 2 cards!")
+    return True
 
 
-def soul_exchange_eff(game):
-    pass
-
-
-def the_wicked_worm_beast_eff(game):
-    pass
-
-
-def lord_of_d_eff(game):
-    pass
-
-
-def mysterious_puppeteer_eff(game):
-    pass
+def tribute_to_the_doomed_eff(game):
+    """Discard 1 card from your hand. Destroy 1 monster on the field."""
+    if len(game.current_player.hand) > 1:
+        print("Please choose a card from your hand to send to the graveyard.")
+        while True:
+            discard_card = game.choose_card_from_hand()
+            if discard_card.name == "Tribute to the Doomed":
+                print(colored("Choose a card that is not Tribute to the Doomed.", "red"))
+            else:
+                game.send_card_hand_to_graveyard(discard_card)
+                monster_to_destroy = game.choose_from_all_monsters_on_field()
+                game.send_monster_field_to_graveyard(monster_to_destroy)
+                return True
+    else:
+        print(colored("You have no cards in your hand to discard! Can't activate this card!", "red"))
+        return False
 
 
 def trap_master_eff(game):
@@ -567,15 +576,11 @@ def the_stern_mystic_eff(game):
     print("These are all of the face down cards on the field:", all_face_downs)
 
 
-def wall_of_illusion_eff(game):
-    pass
-
-
 # Kaiba Starter Deck Monster Cards
 blue_eyes = Monster("Blue-Eyes White Dragon", "Blue-Eyes ", None, 3000, 2500, 8, "Dragon", "Light")
 hitotsu = Monster("Hitotsu-Me Giant", "Hitotsu-Me", None, 1200, 1000, 4, "Beast-Warrior", "Earth")
 ryu_kishin = Monster("Ryu-Kishin", "Ryu-Kishin", None, 1200, 1000, 4, "Beast-Warrior", "Earth")
-wicked_worm = Monster("The Wicked Worm Beast", "WickedWorm", True, 1500, 700, 3, "Beast", "Earth")
+wicked_worm = Monster("The Wicked Worm Beast", "WickedWorm", None, 1500, 700, 3, "Beast", "Earth")
 battle_ox = Monster("Battle Ox", "Battle Ox ", None, 1700, 1000, 4, "Beast-Warrior", "Earth")
 koumori_dragon = Monster("Koumori Dragon", "Koumori D.", None, 1500, 1200, 4, "Dragon", "Normal")
 judge_man = Monster("Judge Man", "Judge Man ", None, 2200, 1500, 6, "Warrior", "Earth")
@@ -599,8 +604,8 @@ destoyer_golem = Monster("Destroyer Golem", "Dest Golem", None, 1500, 1000, 4, "
 d_human = Monster("D. Human", " D. Human ", None, 1300, 1100, 4, "Warrior", "Earth")
 pale_beast = Monster("Pale Beast", "Pale Beast", None, 1500, 1200, 4, "Beast", "Earth")
 skull_red_bird = Monster("Skull Red Bird", "Skull Bird", None, 1550, 1200, 4, "Winged Beast", "Wind")
-lord_of_d = Monster("Lord of D.", "Lord of D.", True, 1200, 1100, 4, "Spellcaster", "Dark")
-myst_pup = Monster("Mysterious Puppeteer", "mPuppeteer", True, 1000, 1500, 4, "Warrior", "Earth")
+lord_of_d = Monster("Lord of D.", "Lord of D.", None, 1200, 1100, 4, "Spellcaster", "Dark")
+myst_pup = Monster("Mysterious Puppeteer", "mPuppeteer", None, 1000, 1500, 4, "Warrior", "Earth")
 trap_master = Monster("Trap Master", "TrapMaster", "Flip", 500, 1100, 3, "Warrior", "Earth")
 hane_hane = Monster("Hane-Hane", "Hane-Hane ", "Flip", 450, 500, 2, "Beast", "Earth")
 
@@ -617,11 +622,11 @@ oozaki = Magic("Oozaki", " Oozaki  ", True)
 dark_hole = Magic("Dark Hole", "Dark Hole ", True)
 invigoration = Magic("Invigoration", "Invigorate", True)
 dark_energy = Magic("Dark Energy", "DarkEnergy", True)
+pot_of_greed = Magic("Pot of Greed", "PotofGreed", True)
 
 # Kaiba Starter Deck Trap Cards
 ultimate_offering = Trap("Ultimate Offering", "U.Offering", True, "Continuous")
 castle_walls = Trap("Castle Walls", "CastleWall", True, "Normal")
-reverse_trap = Trap("Reverse Trap", "Rev. Trap ", True, "Normal")
 just_desserts = Trap("Just Desserts", "J.Desserts", True, "Normal")
 reinforcements = Magic("Reinforcements", "Reinforce ", True)
 two_pronged_attack = Trap("Two-Pronged Attack", "2P- Attack", True, "Normal")
@@ -654,7 +659,7 @@ mystic_clown_2 = Monster("Mystic Clown", "Myst Clown", None, 1500, 1000, 4, "Fie
 ancient_elf = Monster("Ancient Elf", "AncientElf", None, 1450, 1200, 4, "Spellcaster", "Light")
 magical_ghost = Monster("Magical Ghost", "MagicGhost", None, 1300, 1400, 4, "Zombie", "Dark")
 stern_mystic = Monster("The Stern Mystic", "St. Mystic", "Flip", 1500, 1200, 4, "Spellcaster", "Light")
-wall_of_illusion = Monster("Wall of Illusion", "W. Illusion", True, 1000, 1850, 4, "Fiend", "Dark")
+wall_of_illusion = Monster("Wall of Illusion", "W. Illusion", None, 1000, 1850, 4, "Fiend", "Dark")
 neo = Monster("Neo the Magic Swordsman", "Neo Sword ", None, 1700, 1000, 4, "Spellcaster", "Light")
 baron = Monster("Baron of the Fiend Sword", "BaronFiend", None, 1550, 800, 4, "Fiend", "Dark")
 man_eating = Monster("Man-Eating Treasure Chest", "Man-Eating", None, 1600, 1000, 4, "Fiend", "Dark")
@@ -673,14 +678,14 @@ book_of_arts = Magic("Book of Secret Arts", "Secret Arts", True)
 dian_keto = Magic("Dian Keto the Cure Master", "Dian Keto ", True)
 change_of_heart = Magic("Change of Heart", "Chng Heart", True)
 last_will = Magic("Last Will", "Last Will ", True)
-soul_ex = Magic("Soul Exchange", "Soul Exchg", True)
+tribute_to_the_doomed = Magic("Tribute to the Doomed", "Tto Doomed", True)
 card_destruction = Magic("Card Destruction", "Card Destr", True)
 yami = Magic("Yami", "   Yami   ", True)
+pot_of_greed2 = Magic("Pot of Greed", "PotofGreed", True)
 
 # Yugi Starter Deck Trap Cards
 ultimate_offering2 = Trap("Ultimate Offering", "U.Offering", True, "Continuous")
 castle_walls2 = Trap("Castle Walls", "CastleWall", True, "Normal")
-reverse_trap2 = Trap("Reverse Trap", "Rev. Trap ", True, "Normal")
 reinforcements2 = Magic("Reinforcements", "Reinforce ", True)
 two_pronged_attack2 = Trap("Two-Pronged Attack", "2P- Attack", True, "Normal")
 trap_hole2 = Trap("Trap Hole", "Trap Hole ", True, "Quick")
@@ -694,7 +699,7 @@ kaibas_deck = Deck([blue_eyes, hitotsu, ryu_kishin, wicked_worm, battle_ox, koum
                     ryu_kishin_powered, swordstalker, la_jinn, rude_kaiser, destoyer_golem, skull_red_bird, d_human,
                     pale_beast, fissure, trap_hole, two_pronged_attack, de_spell, monster_reborn, inexperienced_spy,
                     reinforcements, ancient_telescope, just_desserts, lord_of_d, flute_of_summoning_dragon,
-                    myst_pup, trap_master, sogen, hane_hane, reverse_trap, remove_trap, castle_walls,
+                    myst_pup, trap_master, sogen, hane_hane, pot_of_greed, remove_trap, castle_walls,
                     ultimate_offering])
 
 # Create deck with all of Yugi's cards.
@@ -703,6 +708,6 @@ yugis_deck = Deck([mystical_elf, feral_imp, winged_dragon, summoned_skull, beave
                    dragon_zombie, doma, ansatsu, witty_phantom, claw_reacher, mystic_clown_2, sword_of_dark,
                    book_of_arts, dark_hole2, dian_keto, ancient_elf, magical_ghost, fissure2, trap_hole2,
                    two_pronged_attack2, de_spell2, monster_reborn2, reinforcements2, change_of_heart, stern_mystic,
-                   wall_of_illusion, neo, baron, man_eating, sorcerer, last_will, waboku, soul_ex, card_destruction,
-                   trap_master2, dragon_capture_jar, yami, man_eater, remove_trap2, castle_walls2,
-                   ultimate_offering2])
+                   wall_of_illusion, neo, baron, man_eating, sorcerer, last_will, waboku, tribute_to_the_doomed,
+                   card_destruction, trap_master2, dragon_capture_jar, yami, man_eater, remove_trap2, castle_walls2,
+                   pot_of_greed2, ultimate_offering2])
