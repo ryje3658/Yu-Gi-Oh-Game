@@ -49,7 +49,10 @@ class Monster(Card):
         if self.position == "FD":
             return colored("Face Down Monster", "blue")
         elif self.position is not None:
-            return colored(f"{self.name}/{self.position}", "blue")
+            if self.position == "ATK":
+                return colored(f"{self.name}/{self.position}-{self.attack}", "blue")
+            elif self.position == "DEF":
+                return colored(f"{self.name}/{self.position}-{self.defense}", "blue")
         else:
             return colored(self.name, "blue")
 
@@ -154,7 +157,7 @@ class Board:
         """Set all game spaces to the empty placeholder, to be changed by user according to their preferences, and the
         graveyard spots and field zone spot to text descriptors.
         """
-        self.empty_placeholder = "----------"
+        self.empty_placeholder = "--------------"
         self.field_zone = self.empty_placeholder
         self.p1_monster_1 = self.empty_placeholder
         self.p1_monster_2 = self.empty_placeholder
@@ -166,7 +169,7 @@ class Board:
         self.p1_magic_3 = self.empty_placeholder
         self.p1_magic_4 = self.empty_placeholder
         self.p1_magic_5 = self.empty_placeholder
-        self.p1_graveyard_display = "Graveyard"
+        self.p1_graveyard_display = "Graveyard     "
         self.p2_monster_1 = self.empty_placeholder
         self.p2_monster_2 = self.empty_placeholder
         self.p2_monster_3 = self.empty_placeholder
@@ -177,7 +180,7 @@ class Board:
         self.p2_magic_3 = self.empty_placeholder
         self.p2_magic_4 = self.empty_placeholder
         self.p2_magic_5 = self.empty_placeholder
-        self.p2_graveyard_display = "Graveyard"
+        self.p2_graveyard_display = "Graveyard     "
         self.p1_slots = [self.p1_monster_1, self.p1_monster_2, self.p1_monster_3, self.p1_monster_4, self.p1_monster_5,
                          self.p1_magic_1, self.p1_magic_2, self.p1_magic_3, self.p1_magic_4, self.p1_magic_5]
         self.p2_slots = [self.p2_monster_1, self.p2_monster_2, self.p2_monster_3, self.p2_monster_4, self.p2_monster_5,
