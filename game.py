@@ -331,13 +331,14 @@ class Game:
             """Updates life points according to damage inflicted during battle. Receives damage adjustments to apply
             to each player's life points.
             """
-            # Assign damage adjustments to player attribute for use with effect in card Waboku
+            # Assign damage adjustments to player attribute for use with effect in card "Waboku"
             self.current_player.damage_taken_this_turn = current_player_damage_to_calc
             self.opposing_player.damage_taken_this_turn = opponent_damage_to_calc
 
-            # Update life points for each player after damage calculation, inform users of damage done
+            # Update life points for each player after damage calculation, negative life points not allowed
             self.current_player.life_points = (self.current_player.life_points - current_player_damage_to_calc)
             self.opposing_player.life_points = (self.opposing_player.life_points - opponent_damage_to_calc)
+            # Inform players of damage don
             print(colored(f"Battle resulted in {current_player_damage_to_calc} damage to {self.current_player} and"
                           f" {opponent_damage_to_calc} damage to {self.opposing_player}!", "red"))
 

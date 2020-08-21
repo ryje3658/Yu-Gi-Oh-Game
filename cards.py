@@ -402,7 +402,7 @@ def yami_eff(game):
     """All fiend/spellcaster monsters on the field gain 200 attack/defense. Fairy monsters lose 200 attack/defense."""
     monsters = game.get_all_monsters_on_field()
     for monster in monsters:
-        if monster.monster_type == "Warrior" or monster.monster_type == "Beast-Warrior":
+        if monster.monster_type == "Fiend" or monster.monster_type == "Spellcaster":
             monster.attack += 200
             monster.defense += 200
             print(f"{monster}'s attack and defense increased by 200!")
