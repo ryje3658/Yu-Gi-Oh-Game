@@ -12,7 +12,7 @@ the others lifepoints to 0 wins!
 
 ### Built With
 
-* [Python]()
+* Python
 
 
 <!-- GETTING STARTED -->
