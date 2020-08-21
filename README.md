@@ -3,7 +3,6 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Yugioh Game!]
 
 A terminal playable yu-gi-oh game based on the first iteration of the trading card game released in America, 
 featuring the two original characters and their decks (collection of cards). Players take turns placing
@@ -18,11 +17,18 @@ the other's lifepoints to 0, wins!
 
 <!-- GETTING STARTED -->
 ## Getting Started
-
 To get a local copy up and running follow these simple steps.
-Clone repository - git clone https://github.com/ryje3658/yu_gi_oh_game
-pip install termcolor (the only necessary dependency not included in Python standard library.)
-Run the game!
+
+1. Clone the repo
+```sh
+git clone https://github.com/ryje3658/yu_gi_oh_game
+```
+2. Install termcolor (the only necessary module not included in Python standard library.)
+```sh
+pip install termcolor
+```
+3. Run the game!
+
 
 (The two decks are included in the cards.py file and are created by making instances of the Monster, Magic,
 and Trap classes defined in game_objects.py. You could create any cards you wanted by creating instances of
