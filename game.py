@@ -46,18 +46,25 @@ class Game:
         """Shuffles both player decks, deals hands, and provides a welcome message explaining the basic gameplay."""
         for player in [self.p1, self.p2]:
             player.shuffle_and_start_hand()
-        print(colored("_____________________________________________________________________________________", "green"))
-        print(colored("_____________________________________________________________________________________", "green"))
-        print(colored("_____________________________________________________________________________________", "green"))
+        print("\n")
+        print(colored("_________________________________________________________________________________________",
+                      "green"))
+        print(colored("_________________________________________________________________________________________",
+                      "green"))
+        print(colored("_________________________________________________________________________________________",
+                      "green"))
         print(colored(f"\nWelcome! Each player starts with {self.p1.life_points} life points. A coin has been flipped "
                       f"and it has\nbeen decided that {self.current_player.name} will go first! Each turn, players will"
                       f" have a drawing phase, main\nphase 1, battle phase, then main phase 2,"
                       " where they will provide input according to the\nactions they'd like to take. The player who "
                       "reduces their opponent's life points to 0 or\ncauses their opponent to no longer have any cards "
                       "to draw wins.\n", "green"))
-        print(colored("_____________________________________________________________________________________", "green"))
-        print(colored("_____________________________________________________________________________________", "green"))
-        print(colored("_____________________________________________________________________________________", "green"))
+        print(colored("_________________________________________________________________________________________",
+                      "green"))
+        print(colored("_________________________________________________________________________________________",
+                      "green"))
+        print(colored("_________________________________________________________________________________________",
+                      "green"))
 
     def draw_phase(self):
         """Player draws one card from their deck and adds it to their hand. Displays new hand to player. First player '
