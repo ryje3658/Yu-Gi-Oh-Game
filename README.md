@@ -1,4 +1,4 @@
-# yu_gi_oh_game
+# Yu-Gi-Oh! Game
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
