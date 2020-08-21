@@ -15,7 +15,6 @@ class Card:
         self.name = name
         self.ten_char_name = ten_char_name
         self.position = None
-        self.location = "Deck"
         self.effect = effect
 
     def __repr__(self):
