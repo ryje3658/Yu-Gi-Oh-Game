@@ -16,6 +16,6 @@ for obj in set(unique_effect_cards):
     obj_string = "\"" + obj.name + "\""
     output_string = output_string + f"{obj_string}: {function_string}, "
 
-output_string = output_string + "}"
+output_string = output_string[:-2] + "}"
 
 print(output_string)
