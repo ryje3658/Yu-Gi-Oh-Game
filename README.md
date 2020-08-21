@@ -28,12 +28,12 @@ git clone https://github.com/ryje3658/yu_gi_oh_game
 pip install termcolor
 ```
 3. Run the game!
-
-
-(The two decks are included in the cards.py file and are created by making instances of the Monster, Magic,
+```sh
+Note: The two decks are included in the cards.py file and are created by making instances of the Monster, Magic,
 and Trap classes defined in game_objects.py. You could create any cards you wanted by creating instances of
 these classes, though any unique card effects would have to be defined in the cards.py file and added to the
-card_effects attribute of the Game class.)
+card_effects attribute of the Game class.
+```
 
 
 ![alt text](https://github.com/ryje3658/yu_gi_oh_game/blob/master/yugioh_demo_smaller.gif "Game Demo")
